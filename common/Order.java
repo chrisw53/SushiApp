@@ -1,23 +1,36 @@
 package common;
 
-public class Order extends Model {
-    private int quant;
-    private Dish dish;
+import java.util.*;
 
-    Order(int quant, Dish dish) {
-        this.quant = quant;
-        this.dish = dish;
+public class Order extends Model {
+    private User user;
+    private HashMap<Dish, Integer> dishes;
+    private Boolean isComplete = false;
+    private String status;
+
+    Order(User user, HashMap<Dish, Integer> dishes) {
+        this.user = user;
+        this.dishes = dishes;
+        this.status = "Processed";
     }
 
     public String getName() {
-        return this.dish.getName();
+        return this.user.getName();
     }
 
-    int getQuant() {
-        return this.quant;
+    public HashMap<Dish, Integer> getDish() {
+        return this.dishes;
     }
 
-    Dish getDish() {
-        return this.dish;
+    public void setIsComplete() {
+        this.isComplete = !this.isComplete;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return this.status;
     }
 }

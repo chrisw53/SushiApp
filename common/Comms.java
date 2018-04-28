@@ -38,7 +38,7 @@ public class Comms {
     }
 
     // When setting up client, run while (true) for receive message
-    ClientStreams clientSetUp() throws IOException {
+    public ClientStreams clientSetUp() throws IOException {
         Socket clientSocket = new Socket("localhost", this.portNum);
         ObjectInputStream inputStream = new ObjectInputStream(clientSocket.getInputStream());
         ObjectOutputStream outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -47,8 +47,8 @@ public class Comms {
     }
 
     // Toolbelt method for client to send message to StockManagement
-    private void sendMessage(
-            Object msg,
+    public void sendMessage(
+            Message msg,
             ObjectOutputStream outputStream
     ) throws IOException {
         outputStream.writeObject(msg);
@@ -56,7 +56,7 @@ public class Comms {
     }
 
     // Toolbelt method for client to receive message from StockManagement
-    private Object receiveMessage(
+    public Object receiveMessage(
             ObjectInputStream inputStream
     ) throws IOException {
         Object msg = new Object();
@@ -105,26 +105,5 @@ class ClientHandler extends Thread {
                  System.out.println("StockManagement receive class not found: " + e);
              }
         }
-    }
-}
-
-class ClientStreams {
-    private ObjectInputStream inputStream;
-    private ObjectOutputStream outputStream;
-
-    ClientStreams(
-            ObjectInputStream inputStream,
-            ObjectOutputStream outputStream
-    ) {
-        this.inputStream = inputStream;
-        this.outputStream = outputStream;
-    }
-
-    ObjectInputStream getInputStream() {
-        return this.inputStream;
-    }
-
-    ObjectOutputStream getOutputStream() {
-        return this.outputStream;
     }
 }
