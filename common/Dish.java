@@ -3,16 +3,15 @@ package common;
 import java.util.*;
 
 public class Dish extends Model {
-    private String name;
     private String description;
     private double price;
-    private HashMap<Ingredient, Double> recipe;
+    private HashMap<Ingredient, Integer> recipe;
 
     Dish(
             String name,
             String description,
             double price,
-            HashMap<Ingredient, Double> recipe
+            HashMap<Ingredient, Integer> recipe
         ) {
         this.name = name;
         this.description = description;
@@ -24,18 +23,18 @@ public class Dish extends Model {
         return this.name;
     }
 
-    HashMap<Ingredient, Double> getRecipe() {
+    HashMap<Ingredient, Integer> getRecipe() {
         return this.recipe;
     }
 
     void deleteIngredient(Ingredient key) {
-        HashMap<Ingredient, Double> oldRecipe = new HashMap<>(this.recipe);
+        HashMap<Ingredient, Integer> oldRecipe = new HashMap<>(this.recipe);
         this.recipe.remove(key);
         notifyUpdate("recipe", oldRecipe, this.recipe);
     }
 
-    void changeIngredientAmount(Ingredient key, double amount) {
-        HashMap<Ingredient, Double> oldRecipe = new HashMap<>(this.recipe);
+    void changeIngredientAmount(Ingredient key, int amount) {
+        HashMap<Ingredient, Integer> oldRecipe = new HashMap<>(this.recipe);
         this.recipe.replace(key, amount);
         notifyUpdate("recipe", oldRecipe, this.recipe);
     }

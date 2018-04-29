@@ -13,6 +13,7 @@ public class Client implements ClientInterface {
 
     public Client() {
         myComms = new Comms();
+
         try {
             ClientStreams myStreams = myComms.clientSetUp();
             inputStream = myStreams.getInputStream();

@@ -2,7 +2,12 @@ package common;
 
 import java.util.*;
 
-public class Staff extends Thread {
+// Do Thread t = new Thread(Staff) when starting a new thread
+public class Staff extends Model implements Runnable {
+    Staff(String name) {
+        this.name = name;
+    }
+
     public void run() {
         while (true) {
             try {
@@ -14,10 +19,14 @@ public class Staff extends Thread {
         }
     }
 
+    public String getName() {
+        return "Staff";
+    }
+
     private void monitorDishes() {
         for (Dish dish : StockManagement.dishes.keySet()) {
             synchronized (this) {
-                StockManagement.StockInfo stock = StockManagement.dishes.get(dish);
+                StockInfo stock = StockManagement.dishes.get(dish);
                 if (stock.getQuant() < stock.getThreshold()) {
                     makeNewDish(dish);
                 }
@@ -41,8 +50,6 @@ public class Staff extends Thread {
             }
         } catch (InterruptedException e) {
             System.out.println("Dish pause error: " + e);
-        } finally {
-            monitorDishes();
         }
     }
 }
