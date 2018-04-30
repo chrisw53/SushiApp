@@ -5,12 +5,12 @@ import java.util.*;
 public class Drone extends Model implements Runnable {
     private String status = "Idle";
     private int speed;
-    private Supplier[] suppliers;
+    private ArrayList<Supplier> suppliers;
     private HashMap<Postcode, Long> postcodeDistance;
 
     public Drone(
             int speed,
-            Supplier[] suppliers,
+            ArrayList<Supplier> suppliers,
             HashMap<Postcode, Long> postcodeDistance
     ) {
         this.speed = speed;

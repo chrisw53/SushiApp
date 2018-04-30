@@ -21,4 +21,16 @@ public class User extends Model {
     public String getName() {
         return this.username;
     }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public Postcode getPostcode() {
+        return this.postcode;
+    }
 }

@@ -4,13 +4,13 @@ import java.util.*;
 
 public class Dish extends Model {
     private String description;
-    private double price;
+    private int price;
     private HashMap<Ingredient, Integer> recipe;
 
     Dish(
             String name,
             String description,
-            double price,
+            int price,
             HashMap<Ingredient, Integer> recipe
         ) {
         this.name = name;
@@ -39,11 +39,11 @@ public class Dish extends Model {
         notifyUpdate("recipe", oldRecipe, this.recipe);
     }
 
-    double getPrice() {
+    int getPrice() {
         return this.price;
     }
 
-    void setPrice(double price) {
+    void setPrice(int price) {
         notifyUpdate("price", this.price, price);
         this.price = price;
     }

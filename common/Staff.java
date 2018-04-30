@@ -44,9 +44,9 @@ public class Staff extends Model implements Runnable {
             StockManagement.dishes.get(dish).setQuant();
             // take away ingredients
             for (Ingredient ingredient : dish.getRecipe().keySet()) {
-                double amount = dish.getRecipe().get(ingredient)
+                int amount = dish.getRecipe().get(ingredient)
                         * StockManagement.dishes.get(dish).getAmountToAdd();
-                StockManagement.ingredients.get(ingredient).setQuant(amount);
+                StockManagement.ingredients.get(ingredient).setQuant(-amount);
             }
         } catch (InterruptedException e) {
             System.out.println("Dish pause error: " + e);

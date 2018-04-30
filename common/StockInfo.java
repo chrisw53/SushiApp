@@ -3,9 +3,9 @@ package common;
 public class StockInfo {
     private int threshold;
     private int amountToAdd;
-    private double quant;
+    private int quant;
 
-    StockInfo(int threshold, int amountToAdd, double quant) {
+    StockInfo(int threshold, int amountToAdd, int quant) {
         this.threshold = threshold;
         this.amountToAdd = amountToAdd;
         this.quant = quant;
@@ -27,7 +27,7 @@ public class StockInfo {
         this.quant += this.amountToAdd;
     }
 
-    void setQuant(double minus) {
-        this.quant -= minus;
+    void setQuant(int quant) {
+        this.quant += quant;
     }
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class Server implements ServerInterface{
 
+
     @Override
     public void loadConfiguration(String filename) throws FileNotFoundException {
 
