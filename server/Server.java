@@ -2,12 +2,14 @@ package server;
 
 import common.*;
 
-import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 public class Server implements ServerInterface{
-
+    public static ArrayList<Supplier> suppliers = new ArrayList<>();
+    public static HashMap<Postcode, Long> postcodeDistance = new HashMap<>();
+    public static ArrayList<User> users = new ArrayList<>();
+    public static ArrayList<Order> orders = new ArrayList<>();
 
     @Override
     public void loadConfiguration(String filename) throws FileNotFoundException {

@@ -2,25 +2,23 @@ package common;
 
 import java.io.*;
 import java.util.*;
+import server.*;
 
 public class Configuration {
-    private ArrayList<Supplier> suppliers = new ArrayList<>();
-    private ArrayList<User> users = new ArrayList<>();
-    private HashMap<Postcode, Long> postcodeDistance = new HashMap<>();
-    private ArrayList<Order> orders = new ArrayList<>();
-    private ArrayList<String> content = new ArrayList<>();
+    private ArrayList<Thread> threads = new ArrayList<>();
 
     public Configuration(String configFile) {
         try (BufferedReader br = new BufferedReader(new FileReader(configFile))) {
             String line;
 
+            // parse
             while ((line = br.readLine()) != null) {
-                content.add(line);
+                parse(line);
             }
 
-            // parser
-            for (String s : content) {
-                parse(s);
+            // Starts Staff & Drone threads after all the info are added
+            for (Thread t : threads) {
+                t.start();
             }
         } catch (FileNotFoundException e) {
             System.out.println("Wrong file name!");
@@ -29,33 +27,17 @@ public class Configuration {
         }
     }
 
-    public ArrayList<Supplier> getSuppliers() {
-        return this.suppliers;
-    }
-
-    public ArrayList<User> getUsers() {
-        return this.users;
-    }
-
-    public HashMap<Postcode, Long> getPostcodeDistance() {
-        return this.postcodeDistance;
-    }
-
-    public ArrayList<Order> getOrders() {
-        return this.orders;
-    }
-
     private void parse(String line) {
         String[] content = line.split(":");
 
         switch (content[0]) {
             case "SUPPLIER":
-                suppliers.add(new Supplier(content[1], Long.parseLong(content[2])));
+                Server.suppliers.add(new Supplier(content[1], Long.parseLong(content[2])));
                 break;
             case "INGREDIENT":
             {
                 Supplier supplier = null;
-                for (Supplier s : this.suppliers) {
+                for (Supplier s : Server.suppliers) {
                     if (s.getName().equalsIgnoreCase(content[3])) {
                         supplier = s;
                     }
@@ -106,10 +88,13 @@ public class Configuration {
             }
                 break;
             case "POSTCODE":
-                postcodeDistance.put(new Postcode(content[1]), Long.parseLong(content[2]));
+                Server.postcodeDistance.put(
+                        new Postcode(content[1]),
+                        Long.parseLong(content[2])
+                );
                 break;
             case "USER":
-                users.add(new User(
+                Server.users.add(new User(
                         content[1],
                         content[2],
                         content[3],
@@ -121,7 +106,7 @@ public class Configuration {
                 User user = null;
                 HashMap<Dish, Integer> orderDetail = new HashMap<>();
 
-                for (User u : users) {
+                for (User u : Server.users) {
                     if (u.getName().equalsIgnoreCase(content[1])) {
                         user = u;
                     }
@@ -142,7 +127,7 @@ public class Configuration {
                     orderDetail.put(dish, quant);
                 }
 
-                orders.add(new Order(user, orderDetail));
+                Server.orders.add(new Order(user, orderDetail));
             }
                 break;
             case "STOCK":
@@ -173,17 +158,17 @@ public class Configuration {
             case "STAFF":
             {
                 Thread t = new Thread(new Staff(content[1]));
-                t.start();
+                threads.add(t);
             }
                 break;
             case "DRONE":
             {
                 Thread t = new Thread(new Drone(
                         Integer.parseInt(content[1]),
-                        suppliers,
-                        postcodeDistance
+                        Server.suppliers,
+                        Server.postcodeDistance
                 ));
-                t.start();
+                threads.add(t);
             }
                 break;
             default:
