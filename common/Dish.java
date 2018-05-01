@@ -5,13 +5,13 @@ import java.util.*;
 public class Dish extends Model {
     private String description;
     private int price;
-    private HashMap<Ingredient, Integer> recipe;
+    private Map<Ingredient, Number> recipe;
 
-    Dish(
+    public Dish(
             String name,
             String description,
             int price,
-            HashMap<Ingredient, Integer> recipe
+            HashMap<Ingredient, Number> recipe
         ) {
         this.name = name;
         this.description = description;
@@ -23,18 +23,28 @@ public class Dish extends Model {
         return this.name;
     }
 
-    HashMap<Ingredient, Integer> getRecipe() {
+    public Map<Ingredient, Number> getRecipe() {
         return this.recipe;
     }
 
-    void deleteIngredient(Ingredient key) {
-        HashMap<Ingredient, Integer> oldRecipe = new HashMap<>(this.recipe);
+    public void addIngredient(Ingredient key, int quant) {
+        HashMap<Ingredient, Number> oldRecipe = new HashMap<>(this.recipe);
+        this.recipe.put(key, quant);
+        notifyUpdate("recipe", oldRecipe, this.recipe);
+    }
+
+    public void deleteIngredient(Ingredient key) {
+        HashMap<Ingredient, Number> oldRecipe = new HashMap<>(this.recipe);
         this.recipe.remove(key);
         notifyUpdate("recipe", oldRecipe, this.recipe);
     }
 
+    public void setRecipe(Map<Ingredient, Number> recipe) {
+        this.recipe = recipe;
+    }
+
     void changeIngredientAmount(Ingredient key, int amount) {
-        HashMap<Ingredient, Integer> oldRecipe = new HashMap<>(this.recipe);
+        HashMap<Ingredient, Number> oldRecipe = new HashMap<>(this.recipe);
         this.recipe.replace(key, amount);
         notifyUpdate("recipe", oldRecipe, this.recipe);
     }

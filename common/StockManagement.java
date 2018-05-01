@@ -3,8 +3,8 @@ package common;
 import java.util.*;
 
 public class StockManagement {
-    static HashMap<Ingredient, StockInfo> ingredients = new HashMap<>();
-    static HashMap<Dish, StockInfo> dishes = new HashMap<>();
+    public static HashMap<Ingredient, StockInfo> ingredients = new HashMap<>();
+    public static HashMap<Dish, StockInfo> dishes = new HashMap<>();
 
     StockManagement() {}
 

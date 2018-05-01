@@ -4,7 +4,7 @@ public class Ingredient extends Model {
     private Supplier supplier;
     private String unit;
 
-    Ingredient(String name, String unit, Supplier supplier) {
+    public Ingredient(String name, String unit, Supplier supplier) {
         this.name = name;
         this.unit = unit;
         this.supplier = supplier;

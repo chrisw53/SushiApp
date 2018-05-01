@@ -5,29 +5,38 @@ public class StockInfo {
     private int amountToAdd;
     private int quant;
 
-    StockInfo(int threshold, int amountToAdd, int quant) {
+    public StockInfo(int threshold, int amountToAdd, int quant) {
         this.threshold = threshold;
         this.amountToAdd = amountToAdd;
         this.quant = quant;
     }
 
-    int getThreshold() {
+    public void setRestockLevel(int threshold, int amountToAdd) {
+        this.threshold = threshold;
+        this.amountToAdd = amountToAdd;
+    }
+
+    public int getThreshold() {
         return this.threshold;
     }
 
-    int getAmountToAdd() {
+    public int getAmountToAdd() {
         return this.amountToAdd;
     }
 
-    double getQuant() {
+    public int getQuant() {
         return this.quant;
     }
 
-    void setQuant() {
+    void addQuant() {
         this.quant += this.amountToAdd;
     }
 
-    void setQuant(int quant) {
+    void addQuant(int quant) {
         this.quant += quant;
+    }
+
+    public void setQuant(int quant) {
+        this.quant = quant;
     }
 }

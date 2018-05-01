@@ -4,7 +4,7 @@ public class Supplier extends Model {
     private String name;
     private long distance;
 
-    Supplier(String name, long distance) {
+    public Supplier(String name, long distance) {
         this.name = name;
         this.distance = distance;
     }
@@ -13,7 +13,7 @@ public class Supplier extends Model {
         return this.name;
     }
 
-    long getDistance() {
+    public long getDistance() {
         return this.distance;
     }
 

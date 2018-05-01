@@ -22,8 +22,25 @@ public class Order extends Model {
         return this.dishes;
     }
 
+    public User getUser() {
+        return this.user;
+    }
+
+    public int getCost() {
+        int cost = 0;
+        for (Dish d : dishes.keySet()) {
+            cost += d.getPrice() * dishes.get(d);
+        }
+
+        return cost;
+    }
+
+    public Boolean getIsComplete() {
+        return this.isComplete;
+    }
+
     public void setIsComplete() {
-        this.isComplete = !this.isComplete;
+        this.isComplete = true;
     }
 
     public void setStatus(String status) {

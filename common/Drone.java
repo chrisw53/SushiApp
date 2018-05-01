@@ -1,21 +1,13 @@
 package common;
 
-import java.util.*;
+import server.Server;
 
 public class Drone extends Model implements Runnable {
     private String status = "Idle";
     private int speed;
-    private ArrayList<Supplier> suppliers;
-    private HashMap<Postcode, Long> postcodeDistance;
 
-    public Drone(
-            int speed,
-            ArrayList<Supplier> suppliers,
-            HashMap<Postcode, Long> postcodeDistance
-    ) {
+    public Drone(int speed) {
         this.speed = speed;
-        this.suppliers = suppliers;
-        this.postcodeDistance = postcodeDistance;
     }
 
     public String getName() {
@@ -23,7 +15,7 @@ public class Drone extends Model implements Runnable {
     }
 
     public void run() {
-        while (true) {
+        while (Server.shouldRestockIngredient) {
             try {
                 Thread.sleep(1000);
                 monitorIngredient();
@@ -33,8 +25,12 @@ public class Drone extends Model implements Runnable {
         }
     }
 
-    String getStatus() {
+    public String getStatus() {
         return this.status;
+    }
+
+    public Number getSpeed() {
+        return this.speed;
     }
 
     private void monitorIngredient() {
@@ -55,15 +51,16 @@ public class Drone extends Model implements Runnable {
 
         try {
             Thread.sleep(timeToSupplier);
-            StockManagement.ingredients.get(ingredient).setQuant();
+            StockManagement.ingredients.get(ingredient).addQuant();
             status = "Idle";
         } catch (InterruptedException e) {
             System.out.println("Restock ingredient error: " + e);
         }
     }
 
+    // TODO: figure out how the delivery mechanism works
     void deliverOrder(Postcode postcode) {
-        long deliveryTime = postcodeDistance.get(postcode) / this.speed;
+        long deliveryTime = Server.postcodeDistance.get(postcode) / this.speed;
         status = "Delivering";
 
         try {

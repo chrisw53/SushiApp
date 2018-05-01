@@ -5,20 +5,19 @@ import java.util.*;
 import server.*;
 
 public class Configuration {
-    private ArrayList<Thread> threads = new ArrayList<>();
+    private String path;
 
     public Configuration(String configFile) {
-        try (BufferedReader br = new BufferedReader(new FileReader(configFile))) {
+        this.path = configFile;
+    }
+
+    public void start() {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
 
             // parse
             while ((line = br.readLine()) != null) {
                 parse(line);
-            }
-
-            // Starts Staff & Drone threads after all the info are added
-            for (Thread t : threads) {
-                t.start();
             }
         } catch (FileNotFoundException e) {
             System.out.println("Wrong file name!");
@@ -59,7 +58,7 @@ public class Configuration {
                 break;
             case "DISH":
             {
-                HashMap<Ingredient, Integer> receipe = new HashMap<>();
+                HashMap<Ingredient, Number> receipe = new HashMap<>();
                 String[] receipeDetails = content[6].split(",");
 
                 for (String detail : receipeDetails) {
@@ -138,7 +137,7 @@ public class Configuration {
                         StockManagement
                                 .ingredients
                                 .get(i)
-                                .setQuant(Integer.parseInt(content[2]));
+                                .addQuant(Integer.parseInt(content[2]));
                         matched = true;
                     }
                 }
@@ -149,7 +148,7 @@ public class Configuration {
                             StockManagement
                                     .dishes
                                     .get(d)
-                                    .setQuant(Integer.parseInt(content[2]));
+                                    .addQuant(Integer.parseInt(content[2]));
                         }
                     }
                 }
@@ -157,18 +156,16 @@ public class Configuration {
                 break;
             case "STAFF":
             {
-                Thread t = new Thread(new Staff(content[1]));
-                threads.add(t);
+                Staff staff = new Staff(content[1]);
+                Thread t = new Thread(staff);
+                Server.staffs.add(staff);
             }
                 break;
             case "DRONE":
             {
-                Thread t = new Thread(new Drone(
-                        Integer.parseInt(content[1]),
-                        Server.suppliers,
-                        Server.postcodeDistance
-                ));
-                threads.add(t);
+                Drone drone = new Drone(Integer.parseInt(content[1]));
+                Thread t = new Thread(drone);
+                Server.drones.add(drone);
             }
                 break;
             default:

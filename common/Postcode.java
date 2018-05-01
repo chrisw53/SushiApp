@@ -3,7 +3,7 @@ package common;
 public class Postcode extends Model {
     private String postcode;
 
-    Postcode(String postcode) {
+    public Postcode(String postcode) {
         this.postcode = postcode;
     }
 
