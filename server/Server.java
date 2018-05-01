@@ -256,6 +256,10 @@ public class Server implements ServerInterface{
     public Drone addDrone(Number speed) {
         Drone drone = new Drone((int) speed);
         drones.add(drone);
+        if (shouldRestockIngredient) {
+            Thread t = new Thread(drone);
+            t.start();
+        }
 
         return drone;
     }
@@ -293,6 +297,11 @@ public class Server implements ServerInterface{
     public Staff addStaff(String name) {
         Staff staff = new Staff(name);
         staffs.add(staff);
+
+        if (shouldRestockDish) {
+            Thread t = new Thread(staff);
+            t.start();
+        }
 
         return staff;
     }
