@@ -6,22 +6,10 @@ import java.io.*;
 import java.util.*;
 
 public class Server implements ServerInterface{
-    public static ArrayList<Supplier> suppliers = new ArrayList<>();
-    public static HashMap<Postcode, Long> postcodeDistance = new HashMap<>();
-    public static ArrayList<User> users = new ArrayList<>();
-    public static ArrayList<Order> ordersToBeProcessed = new ArrayList<>();
-    public static ArrayList<Order> ordersProcessed = new ArrayList<>();
-    public static ArrayList<Drone> drones = new ArrayList<>();
-    public static ArrayList<Staff> staffs = new ArrayList<>();
-    public static Boolean shouldRestockDish = true;
-    public static Boolean shouldRestockIngredient = true;
     private ArrayList<UpdateListener> updateListeners = new ArrayList<>();
     private HashMap<User, ArrayList<DishInfo>> basket = new HashMap<>();
 
     public Server() {
-        // This instantiates the StockManagement static variables serving as app database
-        StockManagement stockManagement = new StockManagement();
-
         try {
             Comms myComms = new Comms();
             myComms.serverSetup(this::serverLogic);
@@ -33,7 +21,7 @@ public class Server implements ServerInterface{
     private Object serverLogic(Message msg) {
         switch (msg.getType()) {
             case "register":
-                users.add((User) msg.getPayload());
+                Database.users.add((User) msg.getPayload());
                 notifyUpdate();
                 break;
             case "login":
@@ -41,7 +29,7 @@ public class Server implements ServerInterface{
                 String username = ((String[]) msg.getPayload())[0];
                 String password = ((String[]) msg.getPayload())[1];
 
-                for (User u : users) {
+                for (User u : Database.users) {
                     if (u.getName().equals(username) && u.getPassword().equals(password)) {
                         notifyUpdate();
                         return u;
@@ -50,7 +38,7 @@ public class Server implements ServerInterface{
             }
                 break;
             case "postcodes":
-                return new ArrayList<>(postcodeDistance.keySet());
+                return new ArrayList<>(Database.postcodeDistance.keySet());
             case "addToBasket":
             {
                 DishInfo info = (DishInfo) msg.getPayload();
@@ -112,13 +100,13 @@ public class Server implements ServerInterface{
                 ArrayList<Order> userOrder = new ArrayList<>();
                 User user = (User) msg.getPayload();
 
-                for (Order o : ordersToBeProcessed) {
+                for (Order o : Database.ordersToBeProcessed) {
                     if (o.getUser() == user) {
                         userOrder.add(o);
                     }
                 }
 
-                for (Order o : ordersProcessed) {
+                for (Order o : Database.ordersProcessed) {
                     if (o.getUser() == user) {
                         userOrder.add(o);
                     }
@@ -127,7 +115,7 @@ public class Server implements ServerInterface{
                 return userOrder;
             }
             case "cancelOrder":
-                ordersToBeProcessed.remove(msg.getPayload());
+                Database.ordersToBeProcessed.remove(msg.getPayload());
                 notifyUpdate();
                 break;
             case "checkout":
@@ -138,9 +126,9 @@ public class Server implements ServerInterface{
                     dishes.put(d.getDish(), (int) d.getQuant());
                 }
                 basket.remove(user);
-                ordersToBeProcessed.add(new Order(user, dishes));
+                Database.ordersToBeProcessed.add(new Order(user, dishes));
 
-                for (Staff s : staffs) {
+                for (Staff s : Database.staffs) {
                     synchronized (s) {
                         s.notify();
                     }
@@ -161,12 +149,12 @@ public class Server implements ServerInterface{
         Configuration myConfig = new Configuration(filename);
         myConfig.start();
 
-        for (Drone d : drones) {
+        for (Drone d : Database.drones) {
             Thread t = new Thread(d);
             t.start();
         }
 
-        for (Staff s : staffs) {
+        for (Staff s : Database.staffs) {
             Thread t = new Thread(s);
             t.start();
         }
@@ -174,10 +162,10 @@ public class Server implements ServerInterface{
 
     @Override
     public void setRestockingIngredientsEnabled(boolean enabled) {
-        shouldRestockIngredient = enabled;
+        Database.shouldRestockIngredient = enabled;
 
         if (enabled) {
-            for (Drone d : drones) {
+            for (Drone d : Database.drones) {
                 synchronized (d) {
                     d.notify();
                 }
@@ -187,10 +175,10 @@ public class Server implements ServerInterface{
 
     @Override
     public void setRestockingDishesEnabled(boolean enabled) {
-        shouldRestockDish = enabled;
+        Database.shouldRestockDish = enabled;
 
         if (enabled) {
-            for (Staff s : staffs) {
+            for (Staff s : Database.staffs) {
                 synchronized (s) {
                     s.notify();
                 }
@@ -379,13 +367,13 @@ public class Server implements ServerInterface{
 
     @Override
     public List<Supplier> getSuppliers() {
-        return suppliers;
+        return Database.suppliers;
     }
 
     @Override
     public Supplier addSupplier(String name, Number distance) {
         Supplier newSupplier = new Supplier(name, (long) distance);
-        suppliers.add(newSupplier);
+        Database.suppliers.add(newSupplier);
 
         notifyUpdate();
 
@@ -394,7 +382,7 @@ public class Server implements ServerInterface{
 
     @Override
     public void removeSupplier(Supplier supplier) throws UnableToDeleteException {
-        suppliers.remove(supplier);
+        Database.suppliers.remove(supplier);
         notifyUpdate();
     }
 
@@ -405,15 +393,15 @@ public class Server implements ServerInterface{
 
     @Override
     public List<Drone> getDrones() {
-        return drones;
+        return Database.drones;
     }
 
     @Override
     public Drone addDrone(Number speed) {
         Drone drone = new Drone((int) speed);
-        drones.add(drone);
+        Database.drones.add(drone);
 
-        if (shouldRestockIngredient) {
+        if (Database.shouldRestockIngredient) {
             Thread t = new Thread(drone);
             t.start();
         }
@@ -426,12 +414,12 @@ public class Server implements ServerInterface{
     @Override
     public void removeDrone(Drone drone) throws UnableToDeleteException {
         // stops all drone threads
-        shouldRestockIngredient = false;
+        Database.shouldRestockIngredient = false;
 
-        drones.remove(drone);
+        Database.drones.remove(drone);
 
         // restart the remaining drones
-        for (Drone d : drones) {
+        for (Drone d : Database.drones) {
             Thread t = new Thread(d);
             t.start();
         }
@@ -451,15 +439,15 @@ public class Server implements ServerInterface{
 
     @Override
     public List<Staff> getStaff() {
-        return staffs;
+        return Database.staffs;
     }
 
     @Override
     public Staff addStaff(String name) {
         Staff staff = new Staff(name);
-        staffs.add(staff);
+        Database.staffs.add(staff);
 
-        if (shouldRestockDish) {
+        if (Database.shouldRestockDish) {
             Thread t = new Thread(staff);
             t.start();
         }
@@ -471,7 +459,7 @@ public class Server implements ServerInterface{
 
     @Override
     public void removeStaff(Staff staff) throws UnableToDeleteException {
-        staffs.remove(staff);
+        Database.staffs.remove(staff);
         notifyUpdate();
     }
 
@@ -482,21 +470,21 @@ public class Server implements ServerInterface{
 
     @Override
     public List<Order> getOrders() {
-        ArrayList<Order> orders = new ArrayList<>(ordersToBeProcessed);
-        orders.addAll(ordersProcessed);
+        ArrayList<Order> orders = new ArrayList<>(Database.ordersToBeProcessed);
+        orders.addAll(Database.ordersProcessed);
 
         return orders;
     }
 
     @Override
     public void removeOrder(Order order) throws UnableToDeleteException {
-        ordersToBeProcessed.remove(order);
+        Database.ordersToBeProcessed.remove(order);
         notifyUpdate();
     }
 
     @Override
     public Number getOrderDistance(Order order) {
-        return postcodeDistance.get(order.getUser().getPostcode());
+        return Database.postcodeDistance.get(order.getUser().getPostcode());
     }
 
     @Override
@@ -516,29 +504,29 @@ public class Server implements ServerInterface{
 
     @Override
     public List<Postcode> getPostcodes() {
-        return new ArrayList<>(postcodeDistance.keySet());
+        return new ArrayList<>(Database.postcodeDistance.keySet());
     }
 
     @Override
     public void addPostcode(String code, Number distance) {
-        postcodeDistance.put(new Postcode(code), (long) distance);
+        Database.postcodeDistance.put(new Postcode(code), (long) distance);
         notifyUpdate();
     }
 
     @Override
     public void removePostcode(Postcode postcode) throws UnableToDeleteException {
-        postcodeDistance.remove(postcode);
+        Database.postcodeDistance.remove(postcode);
         notifyUpdate();
     }
 
     @Override
     public List<User> getUsers() {
-        return users;
+        return Database.users;
     }
 
     @Override
     public void removeUser(User user) throws UnableToDeleteException {
-        users.remove(user);
+        Database.users.remove(user);
         notifyUpdate();
     }
 

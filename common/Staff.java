@@ -1,7 +1,5 @@
 package common;
 
-import server.Server;
-
 import java.util.*;
 
 // Do Thread t = new Thread(Staff) when starting a new thread
@@ -14,7 +12,7 @@ public class Staff extends Model implements Runnable {
 
     public void run() {
         while (true) {
-            if (Server.shouldRestockDish) {
+            if (Database.shouldRestockDish) {
                 try {
                     Thread.sleep(1000);
                     monitorDishes();
@@ -23,7 +21,7 @@ public class Staff extends Model implements Runnable {
                 }
             }
 
-            if (!Server.ordersToBeProcessed.isEmpty()) {
+            if (!Database.ordersToBeProcessed.isEmpty()) {
                 Order order = getLatestOrder();
 
                 for (Dish d : order.getDish().keySet()) {
@@ -34,9 +32,9 @@ public class Staff extends Model implements Runnable {
 
                 order.setStatus("Completed");
                 order.setIsComplete();
-                Server.ordersProcessed.add(order);
+                Database.ordersProcessed.add(order);
 
-                for (Drone d : Server.drones) {
+                for (Drone d : Database.drones) {
                     synchronized (d) {
                         d.notify();
                     }
@@ -94,8 +92,8 @@ public class Staff extends Model implements Runnable {
     }
 
     private synchronized Order getLatestOrder() {
-        Order order = Server.ordersToBeProcessed.get(0);
-        Server.ordersToBeProcessed.remove(0);
+        Order order = Database.ordersToBeProcessed.get(0);
+        Database.ordersToBeProcessed.remove(0);
         return order;
     }
 }

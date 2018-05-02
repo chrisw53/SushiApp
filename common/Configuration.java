@@ -31,12 +31,12 @@ public class Configuration {
 
         switch (content[0]) {
             case "SUPPLIER":
-                Server.suppliers.add(new Supplier(content[1], Long.parseLong(content[2])));
+                Database.suppliers.add(new Supplier(content[1], Long.parseLong(content[2])));
                 break;
             case "INGREDIENT":
             {
                 Supplier supplier = null;
-                for (Supplier s : Server.suppliers) {
+                for (Supplier s : Database.suppliers) {
                     if (s.getName().equalsIgnoreCase(content[3])) {
                         supplier = s;
                     }
@@ -87,13 +87,13 @@ public class Configuration {
             }
                 break;
             case "POSTCODE":
-                Server.postcodeDistance.put(
+                Database.postcodeDistance.put(
                         new Postcode(content[1]),
                         Long.parseLong(content[2])
                 );
                 break;
             case "USER":
-                Server.users.add(new User(
+                Database.users.add(new User(
                         content[1],
                         content[2],
                         content[3],
@@ -105,7 +105,7 @@ public class Configuration {
                 User user = null;
                 HashMap<Dish, Integer> orderDetail = new HashMap<>();
 
-                for (User u : Server.users) {
+                for (User u : Database.users) {
                     if (u.getName().equalsIgnoreCase(content[1])) {
                         user = u;
                     }
@@ -126,7 +126,7 @@ public class Configuration {
                     orderDetail.put(dish, quant);
                 }
 
-                Server.orders.add(new Order(user, orderDetail));
+                Database.ordersToBeProcessed.add(new Order(user, orderDetail));
             }
                 break;
             case "STOCK":
@@ -157,15 +157,13 @@ public class Configuration {
             case "STAFF":
             {
                 Staff staff = new Staff(content[1]);
-                Thread t = new Thread(staff);
-                Server.staffs.add(staff);
+                Database.staffs.add(staff);
             }
                 break;
             case "DRONE":
             {
                 Drone drone = new Drone(Integer.parseInt(content[1]));
-                Thread t = new Thread(drone);
-                Server.drones.add(drone);
+                Database.drones.add(drone);
             }
                 break;
             default:

@@ -1,7 +1,9 @@
 import client.*;
+import common.StockManagement;
 
 public class ClientApplication {
     private Client initialise() {
+        StockManagement stockManagement = new StockManagement();
         return new Client();
     }
 

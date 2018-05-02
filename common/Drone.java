@@ -10,13 +10,13 @@ public class Drone extends Model implements Runnable {
         this.speed = speed;
 
         while (true) {
-            if (!Server.ordersProcessed.isEmpty()) {
+            if (!Database.ordersProcessed.isEmpty()) {
                 Order order = getLatestOrder();
                 deliverOrder(order.getUser().getPostcode());
                 order.setStatus("Delivered");
             }
 
-            if (Server.shouldRestockIngredient) {
+            if (Database.shouldRestockIngredient) {
                 try {
                     Thread.sleep(1000);
                     monitorIngredient();
@@ -41,7 +41,7 @@ public class Drone extends Model implements Runnable {
     }
 
     public void run() {
-        while (Server.shouldRestockIngredient) {
+        while (Database.shouldRestockIngredient) {
             try {
                 Thread.sleep(1000);
                 monitorIngredient();
@@ -85,7 +85,7 @@ public class Drone extends Model implements Runnable {
     }
 
     private void deliverOrder(Postcode postcode) {
-        long deliveryTime = Server.postcodeDistance.get(postcode) / this.speed;
+        long deliveryTime = Database.postcodeDistance.get(postcode) / this.speed;
         status = "Delivering";
 
         try {
@@ -97,8 +97,8 @@ public class Drone extends Model implements Runnable {
     }
 
     private synchronized Order getLatestOrder() {
-        Order order = Server.ordersProcessed.get(0);
-        Server.ordersProcessed.remove(0);
+        Order order = Database.ordersProcessed.get(0);
+        Database.ordersProcessed.remove(0);
         return order;
     }
 }

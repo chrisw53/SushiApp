@@ -1,7 +1,10 @@
+import common.Database;
 import server.*;
 
 public class ServerApplication {
     private Server initialise() {
+        // Instantiate the database
+        Database database = new Database();
         return new Server();
     }
 
