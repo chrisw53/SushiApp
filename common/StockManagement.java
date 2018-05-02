@@ -6,7 +6,7 @@ public class StockManagement {
     public static HashMap<Ingredient, StockInfo> ingredients = new HashMap<>();
     public static HashMap<Dish, StockInfo> dishes = new HashMap<>();
 
-    StockManagement() {}
+    public StockManagement() {}
 
     StockManagement(
             HashMap<Ingredient, StockInfo> ingredients,
@@ -14,29 +14,5 @@ public class StockManagement {
     ) {
         StockManagement.ingredients = ingredients;
         StockManagement.dishes = dishes;
-    }
-
-    StockInfo getIngredientInfo(Ingredient key) {
-        return StockManagement.ingredients.get(key);
-    }
-
-    StockInfo getDishInfo(Dish key) {
-        return StockManagement.dishes.get(key);
-    }
-
-    Set<Ingredient> getIngredients() {
-        return StockManagement.ingredients.keySet();
-    }
-
-    Set<Dish> getDishes() {
-        return StockManagement.dishes.keySet();
-    }
-
-    void addDish(Dish dish, StockInfo stockInfo) {
-        StockManagement.dishes.put(dish, stockInfo);
-    }
-
-    void addIngredient(Ingredient ingredient, StockInfo stockInfo) {
-        StockManagement.ingredients.put(ingredient, stockInfo);
     }
 }

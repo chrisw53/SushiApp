@@ -8,7 +8,7 @@ public class Order extends Model {
     private Boolean isComplete = false;
     private String status;
 
-    Order(User user, HashMap<Dish, Integer> dishes) {
+    public Order(User user, HashMap<Dish, Integer> dishes) {
         this.user = user;
         this.dishes = dishes;
         this.status = "Processed";
@@ -39,11 +39,11 @@ public class Order extends Model {
         return this.isComplete;
     }
 
-    public void setIsComplete() {
+    void setIsComplete() {
         this.isComplete = true;
     }
 
-    public void setStatus(String status) {
+    void setStatus(String status) {
         this.status = status;
     }
 

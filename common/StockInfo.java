@@ -24,19 +24,19 @@ public class StockInfo {
         return this.amountToAdd;
     }
 
-    public int getQuant() {
+    public synchronized int getQuant() {
         return this.quant;
     }
 
-    void addQuant() {
+    synchronized void addQuant() {
         this.quant += this.amountToAdd;
     }
 
-    void addQuant(int quant) {
+    synchronized void addQuant(int quant) {
         this.quant += quant;
     }
 
-    public void setQuant(int quant) {
+    public synchronized void setQuant(int quant) {
         this.quant = quant;
     }
 }

@@ -13,12 +13,42 @@ public class Staff extends Model implements Runnable {
     }
 
     public void run() {
-        while (Server.shouldRestockDish) {
-            try {
-                Thread.sleep(1000);
-                monitorDishes();
-            } catch (InterruptedException e) {
-                System.out.println("Monitor pause error: " + e);
+        while (true) {
+            if (Server.shouldRestockDish) {
+                try {
+                    Thread.sleep(1000);
+                    monitorDishes();
+                } catch (InterruptedException e) {
+                    System.out.println("Monitor pause error: " + e);
+                }
+            }
+
+            if (!Server.ordersToBeProcessed.isEmpty()) {
+                Order order = getLatestOrder();
+
+                for (Dish d : order.getDish().keySet()) {
+                    while (StockManagement.dishes.get(d).getQuant() < order.getDish().get(d)) {
+                        makeNewDish(d);
+                    }
+                }
+
+                order.setStatus("Completed");
+                order.setIsComplete();
+                Server.ordersProcessed.add(order);
+
+                for (Drone d : Server.drones) {
+                    synchronized (d) {
+                        d.notify();
+                    }
+                }
+            }
+
+            synchronized (this) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    System.out.println("Staff waiting error: " + e);
+                }
             }
         }
     }
@@ -61,5 +91,11 @@ public class Staff extends Model implements Runnable {
         } catch (InterruptedException e) {
             System.out.println("Dish pause error: " + e);
         }
+    }
+
+    private synchronized Order getLatestOrder() {
+        Order order = Server.ordersToBeProcessed.get(0);
+        Server.ordersToBeProcessed.remove(0);
+        return order;
     }
 }

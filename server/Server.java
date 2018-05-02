@@ -6,16 +6,155 @@ import java.io.*;
 import java.util.*;
 
 public class Server implements ServerInterface{
-    // TODO: Implement socket logic
     public static ArrayList<Supplier> suppliers = new ArrayList<>();
     public static HashMap<Postcode, Long> postcodeDistance = new HashMap<>();
     public static ArrayList<User> users = new ArrayList<>();
-    public static ArrayList<Order> orders = new ArrayList<>();
+    public static ArrayList<Order> ordersToBeProcessed = new ArrayList<>();
+    public static ArrayList<Order> ordersProcessed = new ArrayList<>();
     public static ArrayList<Drone> drones = new ArrayList<>();
     public static ArrayList<Staff> staffs = new ArrayList<>();
     public static Boolean shouldRestockDish = true;
     public static Boolean shouldRestockIngredient = true;
     private ArrayList<UpdateListener> updateListeners = new ArrayList<>();
+    private HashMap<User, ArrayList<DishInfo>> basket = new HashMap<>();
+
+    Server() {
+        // This instantiates the StockManagement static variables serving as app database
+        StockManagement stockManagement = new StockManagement();
+
+        try {
+            Comms myComms = new Comms();
+            myComms.serverSetup(this::serverLogic);
+        } catch (IOException e) {
+            System.out.println("Server setup error: " + e);
+        }
+    }
+
+    private Object serverLogic(Message msg) {
+        switch (msg.getType()) {
+            case "register":
+                users.add((User) msg.getPayload());
+                notifyUpdate();
+                break;
+            case "login":
+            {
+                String username = ((String[]) msg.getPayload())[0];
+                String password = ((String[]) msg.getPayload())[1];
+
+                for (User u : users) {
+                    if (u.getName().equals(username) && u.getPassword().equals(password)) {
+                        notifyUpdate();
+                        return u;
+                    }
+                }
+            }
+                break;
+            case "postcodes":
+                return new ArrayList<>(postcodeDistance.keySet());
+            case "addToBasket":
+            {
+                DishInfo info = (DishInfo) msg.getPayload();
+                if (basket.containsKey(info.getUser())) {
+                    basket.get(info.getUser()).add(info);
+                } else {
+                    ArrayList<DishInfo> temp = new ArrayList<>();
+                    temp.add(info);
+                    basket.put(info.getUser(), temp);
+                }
+            }
+                notifyUpdate();
+                break;
+            case "basket":
+            {
+                User user = (User) msg.getPayload();
+                HashMap<Dish, Integer> temp = new HashMap<>();
+
+                for (DishInfo d : basket.get(user)) {
+                    temp.put(d.getDish(), (int) d.getQuant());
+                }
+
+                return temp;
+            }
+            case "basketCost":
+            {
+                User user = (User) msg.getPayload();
+                if (basket.containsKey(user)) {
+                    int cost = 0;
+                    for (DishInfo d : basket.get(user)) {
+                        cost += (d.getDish().getPrice() * (int) d.getQuant());
+                    }
+                    return cost;
+                } else {
+                    return 0;
+                }
+            }
+            case "updateBasket":
+            {
+                DishInfo info = (DishInfo) msg.getPayload();
+
+                for (DishInfo d : basket.get(info.getUser())) {
+                    if (d.getDish() == info.getDish()) {
+                        d.setQuant(info.getQuant());
+                    }
+                }
+            }
+                notifyUpdate();
+                break;
+            case "clearBasket":
+            {
+                User user = (User) msg.getPayload();
+                basket.get(user).clear();
+            }
+                notifyUpdate();
+                break;
+            case "orders":
+            {
+                ArrayList<Order> userOrder = new ArrayList<>();
+                User user = (User) msg.getPayload();
+
+                for (Order o : ordersToBeProcessed) {
+                    if (o.getUser() == user) {
+                        userOrder.add(o);
+                    }
+                }
+
+                for (Order o : ordersProcessed) {
+                    if (o.getUser() == user) {
+                        userOrder.add(o);
+                    }
+                }
+
+                return userOrder;
+            }
+            case "cancelOrder":
+                ordersToBeProcessed.remove(msg.getPayload());
+                notifyUpdate();
+                break;
+            case "checkout":
+            {
+                User user = (User) msg.getPayload();
+                HashMap<Dish, Integer> dishes = new HashMap<>();
+                for (DishInfo d : basket.get(user)) {
+                    dishes.put(d.getDish(), (int) d.getQuant());
+                }
+                basket.remove(user);
+                ordersToBeProcessed.add(new Order(user, dishes));
+
+                for (Staff s : staffs) {
+                    synchronized (s) {
+                        s.notify();
+                    }
+                }
+            }
+                notifyUpdate();
+                break;
+            default:
+                return null;
+        }
+
+        // Placeholder return statement
+        return null;
+    }
 
     @Override
     public void loadConfiguration(String filename) throws FileNotFoundException {
@@ -39,8 +178,9 @@ public class Server implements ServerInterface{
 
         if (enabled) {
             for (Drone d : drones) {
-                Thread t = new Thread(d);
-                t.start();
+                synchronized (d) {
+                    d.notify();
+                }
             }
         }
     }
@@ -51,8 +191,9 @@ public class Server implements ServerInterface{
 
         if (enabled) {
             for (Staff s : staffs) {
-                Thread t = new Thread(s);
-                t.start();
+                synchronized (s) {
+                    s.notify();
+                }
             }
         }
     }
@@ -60,11 +201,13 @@ public class Server implements ServerInterface{
     @Override
     public void setStock(Dish dish, Number stock) {
         StockManagement.dishes.get(dish).setQuant((int) stock);
+        notifyUpdate();
     }
 
     @Override
     public void setStock(Ingredient ingredient, Number stock) {
         StockManagement.ingredients.get(ingredient).setQuant((int) stock);
+        notifyUpdate();
     }
 
     @Override
@@ -89,6 +232,7 @@ public class Server implements ServerInterface{
                         0
                 )
         );
+        notifyUpdate();
 
         return newDish;
     }
@@ -96,6 +240,7 @@ public class Server implements ServerInterface{
     @Override
     public void removeDish(Dish dish) throws UnableToDeleteException {
         StockManagement.dishes.remove(dish);
+        notifyUpdate();
     }
 
     @Override
@@ -105,6 +250,7 @@ public class Server implements ServerInterface{
                 d.addIngredient(ingredient, (int) quantity);
             }
         }
+        notifyUpdate();
     }
 
     @Override
@@ -114,6 +260,7 @@ public class Server implements ServerInterface{
                 d.deleteIngredient(ingredient);
             }
         }
+        notifyUpdate();
     }
 
     @Override
@@ -123,6 +270,7 @@ public class Server implements ServerInterface{
                 d.setRecipe(recipe);
             }
         }
+        notifyUpdate();
     }
 
     @Override
@@ -131,6 +279,7 @@ public class Server implements ServerInterface{
                 (int) restockThreshold,
                 (int) restockAmount
         );
+        notifyUpdate();
     }
 
     @Override
@@ -187,12 +336,15 @@ public class Server implements ServerInterface{
                 )
         );
 
+        notifyUpdate();
+
         return newIngredient;
     }
 
     @Override
     public void removeIngredient(Ingredient ingredient) throws UnableToDeleteException {
         StockManagement.ingredients.remove(ingredient);
+        notifyUpdate();
     }
 
     @Override
@@ -201,6 +353,7 @@ public class Server implements ServerInterface{
                 (int) restockThreshold,
                 (int) restockAmount
         );
+        notifyUpdate();
     }
 
     @Override
@@ -234,12 +387,15 @@ public class Server implements ServerInterface{
         Supplier newSupplier = new Supplier(name, (long) distance);
         suppliers.add(newSupplier);
 
+        notifyUpdate();
+
         return newSupplier;
     }
 
     @Override
     public void removeSupplier(Supplier supplier) throws UnableToDeleteException {
         suppliers.remove(supplier);
+        notifyUpdate();
     }
 
     @Override
@@ -256,10 +412,13 @@ public class Server implements ServerInterface{
     public Drone addDrone(Number speed) {
         Drone drone = new Drone((int) speed);
         drones.add(drone);
+
         if (shouldRestockIngredient) {
             Thread t = new Thread(drone);
             t.start();
         }
+
+        notifyUpdate();
 
         return drone;
     }
@@ -276,6 +435,8 @@ public class Server implements ServerInterface{
             Thread t = new Thread(d);
             t.start();
         }
+
+        notifyUpdate();
     }
 
     @Override
@@ -303,12 +464,15 @@ public class Server implements ServerInterface{
             t.start();
         }
 
+        notifyUpdate();
+
         return staff;
     }
 
     @Override
     public void removeStaff(Staff staff) throws UnableToDeleteException {
         staffs.remove(staff);
+        notifyUpdate();
     }
 
     @Override
@@ -318,12 +482,16 @@ public class Server implements ServerInterface{
 
     @Override
     public List<Order> getOrders() {
+        ArrayList<Order> orders = new ArrayList<>(ordersToBeProcessed);
+        orders.addAll(ordersProcessed);
+
         return orders;
     }
 
     @Override
     public void removeOrder(Order order) throws UnableToDeleteException {
-        orders.remove(order);
+        ordersToBeProcessed.remove(order);
+        notifyUpdate();
     }
 
     @Override
@@ -354,11 +522,13 @@ public class Server implements ServerInterface{
     @Override
     public void addPostcode(String code, Number distance) {
         postcodeDistance.put(new Postcode(code), (long) distance);
+        notifyUpdate();
     }
 
     @Override
     public void removePostcode(Postcode postcode) throws UnableToDeleteException {
         postcodeDistance.remove(postcode);
+        notifyUpdate();
     }
 
     @Override
@@ -369,6 +539,7 @@ public class Server implements ServerInterface{
     @Override
     public void removeUser(User user) throws UnableToDeleteException {
         users.remove(user);
+        notifyUpdate();
     }
 
     @Override

@@ -8,12 +8,10 @@ import java.util.*;
 public class Client implements ClientInterface {
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
-    private Comms myComms;
+    private Comms myComms = new Comms();
     private ArrayList<UpdateListener> updateListeners = new ArrayList<>();
 
     public Client() {
-        myComms = new Comms();
-
         try {
             ClientStreams myStreams = myComms.clientSetUp();
             inputStream = myStreams.getInputStream();
@@ -65,35 +63,17 @@ public class Client implements ClientInterface {
 
     @Override
     public List<Dish> getDishes() {
-        try {
-            myComms.sendMessage(new Message("dishes"), this.outputStream);
-            return (ArrayList) myComms.receiveMessage(this.inputStream);
-        } catch (IOException e) {
-            System.out.println("Get dishes error: " + e);
-            return null;
-        }
+        return new ArrayList<>(StockManagement.dishes.keySet());
     }
 
     @Override
     public String getDishDescription(Dish dish) {
-        try {
-            myComms.sendMessage(new Message("dishDescription", dish), this.outputStream);
-            return (String) myComms.receiveMessage(this.inputStream);
-        } catch (IOException e) {
-            System.out.println("Get dish description error: " + e);
-            return null;
-        }
+        return dish.getDescription();
     }
 
     @Override
     public Number getDishPrice(Dish dish) {
-        try {
-            myComms.sendMessage(new Message("dishPrice", dish), this.outputStream);
-            return (Double) myComms.receiveMessage(this.inputStream);
-        } catch (IOException e) {
-            System.out.println("Get dish price error: " + e);
-            return null;
-        }
+        return dish.getPrice();
     }
 
     @Override
@@ -111,7 +91,7 @@ public class Client implements ClientInterface {
     public Number getBasketCost(User user) {
         try {
             myComms.sendMessage(new Message("basketCost", user), this.outputStream);
-            return (Double) myComms.receiveMessage(this.inputStream);
+            return (Integer) myComms.receiveMessage(this.inputStream);
         } catch (IOException e) {
             System.out.println("Get basket cost error: " + e);
             return null;
@@ -123,6 +103,7 @@ public class Client implements ClientInterface {
         try {
             DishInfo newDish = new DishInfo(user, dish, quantity);
             myComms.sendMessage(new Message("addToBasket", newDish), this.outputStream);
+            notifyUpdate();
         } catch (IOException e) {
             System.out.println("Add to basket error: " + e);
         }
@@ -133,6 +114,7 @@ public class Client implements ClientInterface {
         try {
             DishInfo updateDish = new DishInfo(user, dish, quantity);
             myComms.sendMessage(new Message("updateBasket", updateDish), this.outputStream);
+            notifyUpdate();
         } catch (IOException e) {
             System.out.println("Update basket error: " + e);
         }
@@ -142,6 +124,7 @@ public class Client implements ClientInterface {
     public Order checkoutBasket(User user) {
         try {
             myComms.sendMessage(new Message("checkout", user), this.outputStream);
+            notifyUpdate();
             return (Order) myComms.receiveMessage(this.inputStream);
         } catch (IOException e) {
             System.out.println("Check out error: " + e);
@@ -153,6 +136,7 @@ public class Client implements ClientInterface {
     public void clearBasket(User user) {
         try {
             myComms.sendMessage(new Message("clearBasket", user), this.outputStream);
+            notifyUpdate();
         } catch (IOException e) {
             System.out.println("Clear basket error: " + e);
         }
@@ -171,41 +155,24 @@ public class Client implements ClientInterface {
 
     @Override
     public boolean isOrderComplete(Order order) {
-        try {
-            myComms.sendMessage(new Message("isOrderComplete", order), this.outputStream);
-            return (Boolean) myComms.receiveMessage(this.inputStream);
-        } catch (IOException e) {
-            System.out.println("Is order complete error: " + e);
-            return false;
-        }
+        return order.getIsComplete();
     }
 
     @Override
     public String getOrderStatus(Order order) {
-        try {
-            myComms.sendMessage(new Message("orderStatus", order), this.outputStream);
-            return (String) myComms.receiveMessage(this.inputStream);
-        } catch (IOException e) {
-            System.out.println("Order status error: " + e);
-            return null;
-        }
+        return order.getStatus();
     }
 
     @Override
     public Number getOrderCost(Order order) {
-        try {
-            myComms.sendMessage(new Message("orderCost", order), this.outputStream);
-            return (Double) myComms.receiveMessage(this.inputStream);
-        } catch (IOException e) {
-            System.out.println("Order cost error: " + e);
-            return null;
-        }
+        return order.getCost();
     }
 
     @Override
     public void cancelOrder(Order order) {
         try {
             myComms.sendMessage(new Message("cancelOrder", order), this.outputStream);
+            notifyUpdate();
         } catch (IOException e) {
             System.out.println("Cancel order error: " + e);
         }

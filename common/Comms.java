@@ -8,7 +8,7 @@ public class Comms {
     private int portNum = 1234;
 
     // Set up method for StockManagement
-    void serverSetup(Function<String, Model> callback) throws IOException {
+    public void serverSetup(Function<Message, Object> callback) throws IOException {
         ServerSocket server = new ServerSocket(this.portNum);
 
         while (true) {
@@ -77,13 +77,13 @@ class ClientHandler extends Thread {
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
     private Socket connection;
-    private Function<String, Model> logic;
+    private Function<Message, Object> logic;
 
     ClientHandler(
             Socket connection,
             ObjectInputStream inputStream,
             ObjectOutputStream outputStream,
-            Function<String, Model> logic
+            Function<Message, Object> logic
     ) {
         this.connection = connection;
         this.inputStream = inputStream;
@@ -92,11 +92,11 @@ class ClientHandler extends Thread {
     }
 
     public void run() {
-        String received;
+        Message received;
 
         while (true) {
              try {
-                 received = (String) inputStream.readObject();
+                 received = (Message) inputStream.readObject();
                  outputStream.writeObject(logic.apply(received));
                  outputStream.flush();
              } catch (IOException e) {

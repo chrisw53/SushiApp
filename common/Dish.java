@@ -49,7 +49,7 @@ public class Dish extends Model {
         notifyUpdate("recipe", oldRecipe, this.recipe);
     }
 
-    int getPrice() {
+    public int getPrice() {
         return this.price;
     }
 
@@ -58,7 +58,7 @@ public class Dish extends Model {
         this.price = price;
     }
 
-    String getDescription() {
+    public String getDescription() {
         return this.description;
     }
 

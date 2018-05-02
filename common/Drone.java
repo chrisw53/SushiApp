@@ -8,6 +8,32 @@ public class Drone extends Model implements Runnable {
 
     public Drone(int speed) {
         this.speed = speed;
+
+        while (true) {
+            if (!Server.ordersProcessed.isEmpty()) {
+                Order order = getLatestOrder();
+                deliverOrder(order.getUser().getPostcode());
+                order.setStatus("Delivered");
+            }
+
+            if (Server.shouldRestockIngredient) {
+                try {
+                    Thread.sleep(1000);
+                    monitorIngredient();
+                } catch (InterruptedException e) {
+                    System.out.println("Monitor pause error: " + e);
+                }
+            }
+
+            synchronized (this) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    System.out.println("Drone wait error: " + e);
+                }
+            }
+        }
+
     }
 
     public String getName() {
@@ -58,8 +84,7 @@ public class Drone extends Model implements Runnable {
         }
     }
 
-    // TODO: figure out how the delivery mechanism works
-    void deliverOrder(Postcode postcode) {
+    private void deliverOrder(Postcode postcode) {
         long deliveryTime = Server.postcodeDistance.get(postcode) / this.speed;
         status = "Delivering";
 
@@ -69,5 +94,11 @@ public class Drone extends Model implements Runnable {
         } catch (InterruptedException e) {
             System.out.println("Drone delivery error: " + e);
         }
+    }
+
+    private synchronized Order getLatestOrder() {
+        Order order = Server.ordersProcessed.get(0);
+        Server.ordersProcessed.remove(0);
+        return order;
     }
 }

@@ -23,7 +23,11 @@ public class DishInfo {
         return this.dish;
     }
 
-    public Number quant() {
+    public Number getQuant() {
         return this.quant;
+    }
+
+    public void setQuant(Number quant) {
+        this.quant = quant;
     }
 }
