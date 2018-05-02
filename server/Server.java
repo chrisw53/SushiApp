@@ -18,7 +18,7 @@ public class Server implements ServerInterface{
     private ArrayList<UpdateListener> updateListeners = new ArrayList<>();
     private HashMap<User, ArrayList<DishInfo>> basket = new HashMap<>();
 
-    Server() {
+    public Server() {
         // This instantiates the StockManagement static variables serving as app database
         StockManagement stockManagement = new StockManagement();
 
