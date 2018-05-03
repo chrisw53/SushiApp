@@ -100,6 +100,8 @@ public class Configuration {
                 ));
                 break;
             case "ORDER":
+            case "UNPROCESSEDORDER":
+            case "PROCESSEDORDER":
             {
                 User user = null;
                 HashMap<Dish, Integer> orderDetail = new HashMap<>();
@@ -125,7 +127,11 @@ public class Configuration {
                     orderDetail.put(dish, quant);
                 }
 
-                Database.ordersToBeProcessed.add(new Order(user, orderDetail));
+                if (content[0].equalsIgnoreCase("PROCESSEDORDER")) {
+                    Database.ordersProcessed.add(new Order(user, orderDetail));
+                } else {
+                    Database.ordersToBeProcessed.add(new Order(user, orderDetail));
+                }
             }
                 break;
             case "STOCK":
