@@ -2,7 +2,6 @@ package common;
 
 import java.io.*;
 import java.util.*;
-import server.*;
 
 public class Configuration {
     private String path;
@@ -170,30 +169,4 @@ public class Configuration {
                 break;
         }
     }
-
-    /*
-    public static void main(String[] args) {
-        Configuration test = new Configuration("src/common/ConfigurationTest.txt");
-
-        System.out.println("\nSuppliers\n");
-        for (Supplier s : test.getSuppliers()) {
-            System.out.println("Name: " + s.getName());
-            System.out.println("Distance: " + s.getDistance());
-        }
-
-        System.out.println("\nUsers\n");
-        for (User u : test.getUsers()) {
-            System.out.println("Name: " + u.getName());
-            System.out.println("Address: " + u.getAddress());
-            System.out.println("Password: " + u.getPassword());
-            System.out.println("Postcode: " + u.getPostcode());
-        }
-
-        System.out.println("\nPostcodes\n");
-        for (Postcode p : test.getPostcodeDistance().keySet()) {
-            System.out.println("Postcode: " + p.getName());
-            System.out.println("Distance: " + test.getPostcodeDistance().get(p));
-        }
-    }
-    */
 }

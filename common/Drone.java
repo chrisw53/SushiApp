@@ -1,7 +1,5 @@
 package common;
 
-import server.Server;
-
 public class Drone extends Model implements Runnable {
     private String status = "Idle";
     private int speed;
