@@ -13,7 +13,6 @@ public class ClientApplication {
 
     public static void main(String[] args) {
         ClientApplication newClient = new ClientApplication();
-
         newClient.launchGUI(newClient.initialise());
     }
 }

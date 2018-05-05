@@ -41,11 +41,16 @@ public class Staff extends Model implements Runnable {
                 }
             }
 
-            synchronized (this) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    System.out.println("Staff waiting error: " + e);
+            if (
+                Database.ordersToBeProcessed.isEmpty() &&
+                !Database.shouldRestockDish
+            ) {
+                synchronized (this) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        System.out.println("Staff waiting error: " + e);
+                    }
                 }
             }
         }
@@ -91,7 +96,7 @@ public class Staff extends Model implements Runnable {
         }
     }
 
-    private synchronized Order getLatestOrder() {
+    public synchronized Order getLatestOrder() {
         Order order = Database.ordersToBeProcessed.get(0);
         Database.ordersToBeProcessed.remove(0);
         return order;

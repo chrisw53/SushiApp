@@ -1,10 +1,11 @@
-import common.Database;
+import common.*;
 import server.*;
 
 public class ServerApplication {
     private Server initialise() {
         // Instantiate the database
         Database database = new Database();
+
         return new Server();
     }
 
@@ -13,7 +14,9 @@ public class ServerApplication {
     }
 
     public static void main(String[] args) {
-        ServerApplication server = new ServerApplication();
-        server.launchGUI(server.initialise());
+        ServerApplication serverWindow = new ServerApplication();
+        Server serverInterface = serverWindow.initialise();
+        serverWindow.launchGUI(serverInterface);
+        ServerCommSetup commSetup = new ServerCommSetup();
     }
 }

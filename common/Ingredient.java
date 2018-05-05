@@ -14,11 +14,11 @@ public class Ingredient extends Model {
         return this.name;
     }
 
-    Supplier getSupplier() {
+    public Supplier getSupplier() {
         return this.supplier;
     }
 
-    String getUnit() {
+    public String getUnit() {
         return this.unit;
     }
 }

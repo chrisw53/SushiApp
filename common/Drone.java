@@ -23,11 +23,17 @@ public class Drone extends Model implements Runnable {
                 }
             }
 
-            synchronized (this) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    System.out.println("Drone wait error: " + e);
+            if (
+                    !Database.shouldRestockIngredient &&
+                    Database.ordersProcessed.isEmpty()
+            ) {
+                synchronized (this) {
+                    try {
+                        System.out.println("Drone waiting");
+                        wait();
+                    } catch (InterruptedException e) {
+                        System.out.println("Drone wait error: " + e);
+                    }
                 }
             }
         }

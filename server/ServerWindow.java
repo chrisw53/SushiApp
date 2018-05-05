@@ -83,6 +83,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
+        System.out.println("I ran");
 
         //Start timed updates
         startTimer();

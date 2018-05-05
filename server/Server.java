@@ -7,142 +7,6 @@ import java.util.*;
 
 public class Server implements ServerInterface{
     private ArrayList<UpdateListener> updateListeners = new ArrayList<>();
-    private HashMap<User, ArrayList<DishInfo>> basket = new HashMap<>();
-
-    public Server() {
-        try {
-            Comms myComms = new Comms();
-            myComms.serverSetup(this::serverLogic);
-        } catch (IOException e) {
-            System.out.println("Server setup error: " + e);
-        }
-    }
-
-    private Object serverLogic(Message msg) {
-        switch (msg.getType()) {
-            case "register":
-                Database.users.add((User) msg.getPayload());
-                notifyUpdate();
-                break;
-            case "login":
-            {
-                String username = ((String[]) msg.getPayload())[0];
-                String password = ((String[]) msg.getPayload())[1];
-
-                for (User u : Database.users) {
-                    if (u.getName().equals(username) && u.getPassword().equals(password)) {
-                        notifyUpdate();
-                        return u;
-                    }
-                }
-            }
-                break;
-            case "postcodes":
-                return new ArrayList<>(Database.postcodeDistance.keySet());
-            case "addToBasket":
-            {
-                DishInfo info = (DishInfo) msg.getPayload();
-                if (basket.containsKey(info.getUser())) {
-                    basket.get(info.getUser()).add(info);
-                } else {
-                    ArrayList<DishInfo> temp = new ArrayList<>();
-                    temp.add(info);
-                    basket.put(info.getUser(), temp);
-                }
-            }
-                notifyUpdate();
-                break;
-            case "basket":
-            {
-                User user = (User) msg.getPayload();
-                HashMap<Dish, Integer> temp = new HashMap<>();
-
-                for (DishInfo d : basket.get(user)) {
-                    temp.put(d.getDish(), (int) d.getQuant());
-                }
-
-                return temp;
-            }
-            case "basketCost":
-            {
-                User user = (User) msg.getPayload();
-                if (basket.containsKey(user)) {
-                    int cost = 0;
-                    for (DishInfo d : basket.get(user)) {
-                        cost += (d.getDish().getPrice() * (int) d.getQuant());
-                    }
-                    return cost;
-                } else {
-                    return 0;
-                }
-            }
-            case "updateBasket":
-            {
-                DishInfo info = (DishInfo) msg.getPayload();
-
-                for (DishInfo d : basket.get(info.getUser())) {
-                    if (d.getDish() == info.getDish()) {
-                        d.setQuant(info.getQuant());
-                    }
-                }
-            }
-                notifyUpdate();
-                break;
-            case "clearBasket":
-            {
-                User user = (User) msg.getPayload();
-                basket.get(user).clear();
-            }
-                notifyUpdate();
-                break;
-            case "orders":
-            {
-                ArrayList<Order> userOrder = new ArrayList<>();
-                User user = (User) msg.getPayload();
-
-                for (Order o : Database.ordersToBeProcessed) {
-                    if (o.getUser() == user) {
-                        userOrder.add(o);
-                    }
-                }
-
-                for (Order o : Database.ordersProcessed) {
-                    if (o.getUser() == user) {
-                        userOrder.add(o);
-                    }
-                }
-
-                return userOrder;
-            }
-            case "cancelOrder":
-                Database.ordersToBeProcessed.remove(msg.getPayload());
-                notifyUpdate();
-                break;
-            case "checkout":
-            {
-                User user = (User) msg.getPayload();
-                HashMap<Dish, Integer> dishes = new HashMap<>();
-                for (DishInfo d : basket.get(user)) {
-                    dishes.put(d.getDish(), (int) d.getQuant());
-                }
-                basket.remove(user);
-                Database.ordersToBeProcessed.add(new Order(user, dishes));
-
-                for (Staff s : Database.staffs) {
-                    synchronized (s) {
-                        s.notify();
-                    }
-                }
-            }
-                notifyUpdate();
-                break;
-            default:
-                return null;
-        }
-
-        // Placeholder return statement
-        return null;
-    }
 
     @Override
     public void loadConfiguration(String filename) throws FileNotFoundException {
@@ -158,6 +22,8 @@ public class Server implements ServerInterface{
             Thread t = new Thread(s);
             t.start();
         }
+
+        notifyUpdate();
     }
 
     @Override
@@ -211,7 +77,7 @@ public class Server implements ServerInterface{
             Number restockThreshold,
             Number restockAmount
     ) {
-        Dish newDish = new Dish(name, description, (int) price, null);
+        Dish newDish = new Dish(name, description, (int) price, new HashMap<>());
         StockManagement.dishes.put(
                 newDish,
                 new StockInfo(
@@ -256,6 +122,8 @@ public class Server implements ServerInterface{
         for (Dish d : StockManagement.dishes.keySet()) {
             if (d == dish) {
                 d.setRecipe(recipe);
+            } else {
+                dish.setRecipe(recipe);
             }
         }
         notifyUpdate();
@@ -288,7 +156,7 @@ public class Server implements ServerInterface{
             }
         }
 
-        return null;
+        return new HashMap<>();
     }
 
     @Override
@@ -372,11 +240,10 @@ public class Server implements ServerInterface{
 
     @Override
     public Supplier addSupplier(String name, Number distance) {
-        Supplier newSupplier = new Supplier(name, (long) distance);
+        Supplier newSupplier = new Supplier(name, distance.longValue());
         Database.suppliers.add(newSupplier);
 
         notifyUpdate();
-
         return newSupplier;
     }
 
@@ -509,7 +376,7 @@ public class Server implements ServerInterface{
 
     @Override
     public void addPostcode(String code, Number distance) {
-        Database.postcodeDistance.put(new Postcode(code), (long) distance);
+        Database.postcodeDistance.put(new Postcode(code), distance.longValue());
         notifyUpdate();
     }
 
