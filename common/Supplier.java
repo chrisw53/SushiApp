@@ -1,7 +1,6 @@
 package common;
 
 public class Supplier extends Model {
-    private String name;
     private long distance;
 
     public Supplier(String name, long distance) {

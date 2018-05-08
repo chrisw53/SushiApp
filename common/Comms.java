@@ -24,7 +24,6 @@ public class Comms {
 
                 // new thread for incoming connection
                 Thread t = new ClientHandler(
-                        connection,
                         inputStream,
                         outputStream,
                         callback
@@ -76,16 +75,13 @@ public class Comms {
 class ClientHandler extends Thread {
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
-    private Socket connection;
     private Function<Message, Object> logic;
 
     ClientHandler(
-            Socket connection,
             ObjectInputStream inputStream,
             ObjectOutputStream outputStream,
             Function<Message, Object> logic
     ) {
-        this.connection = connection;
         this.inputStream = inputStream;
         this.outputStream = outputStream;
         this.logic = logic;
@@ -97,10 +93,11 @@ class ClientHandler extends Thread {
         while (true) {
              try {
                  received = (Message) inputStream.readObject();
+                 System.out.println(received.getType());
                  outputStream.writeObject(logic.apply(received));
                  outputStream.flush();
              } catch (IOException e) {
-                 System.out.println("StockManagement receive I/O Error: " + e);
+                 // System.out.println("StockManagement receive I/O Error: " + e);
              } catch (ClassNotFoundException e) {
                  System.out.println("StockManagement receive class not found: " + e);
              }

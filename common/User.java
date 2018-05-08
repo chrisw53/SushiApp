@@ -1,6 +1,8 @@
 package common;
 
-public class User extends Model {
+import java.io.Serializable;
+
+public class User extends Model implements Serializable {
     private String username;
     private String password;
     private String address;
