@@ -22,7 +22,7 @@ public class Staff extends Model implements Runnable {
             }
 
             if (!Database.ordersToBeProcessed.isEmpty()) {
-                Order order = getLatestOrder();
+                Order order = latestOrder();
 
                 for (Dish d : order.getDish().keySet()) {
                     while (StockManagement.dishes.get(d).getQuant() < order.getDish().get(d)) {
@@ -80,25 +80,44 @@ public class Staff extends Model implements Runnable {
         long sleepTimer = rand.nextInt(60000) + 20000;
 
         try {
-            status = "Cooking";
-            System.out.println(status);
-            Thread.sleep(sleepTimer);
-            // adds new dish
-            StockManagement.dishes.get(dish).addQuant();
-            // take away ingredients
-            for (Ingredient ingredient : dish.getRecipe().keySet()) {
-                int amount = (int) dish.getRecipe().get(ingredient)
-                        * StockManagement.dishes.get(dish).getAmountToAdd();
-                StockManagement.ingredients.get(ingredient).addQuant(-amount);
+            boolean enoughIngredient = true;
+
+            // Check if there're enough ingredient to make the dish at its restock amount
+            for (Ingredient i : dish.getRecipe().keySet()) {
+                if (
+                        (int) dish.getRecipe().get(i)
+                                * StockManagement.dishes.get(dish).getAmountToAdd() >
+                        StockManagement.ingredients.get(i).getQuant()
+                ) {
+                    enoughIngredient = false;
+                }
             }
-            status = "Idle";
+
+            if (enoughIngredient) {
+                // take away ingredients
+                for (Ingredient ingredient : dish.getRecipe().keySet()) {
+                    int amount = (int) dish.getRecipe().get(ingredient)
+                            * StockManagement.dishes.get(dish).getAmountToAdd();
+                    System.out.println("Took away this much: " + amount);
+                    StockManagement.ingredients.get(ingredient).addQuant(-amount);
+                }
+
+                status = "Cooking";
+                System.out.println(status);
+                Thread.sleep(sleepTimer);
+
+                // adds new dish
+                StockManagement.dishes.get(dish).addQuant();
+                status = "Idle";
+            }
         } catch (InterruptedException e) {
             System.out.println("Dish pause error: " + e);
         }
     }
 
-    public synchronized Order getLatestOrder() {
+    private synchronized Order latestOrder() {
         if (!Database.ordersToBeProcessed.isEmpty()) {
+            System.out.println("Grabbing Latest Order");
             Order order = Database.ordersToBeProcessed.get(0);
             Database.ordersToBeProcessed.remove(0);
             return order;

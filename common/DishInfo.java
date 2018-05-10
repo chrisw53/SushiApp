@@ -1,6 +1,8 @@
 package common;
 
-public class DishInfo {
+import java.io.Serializable;
+
+public class DishInfo implements Serializable {
     private User user;
     private Dish dish;
     private Number quant;

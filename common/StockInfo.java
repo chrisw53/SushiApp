@@ -1,6 +1,8 @@
 package common;
 
-public class StockInfo {
+import java.io.Serializable;
+
+public class StockInfo implements Serializable {
     private int threshold;
     private int amountToAdd;
     private int quant;

@@ -34,8 +34,10 @@ public class ServerCommSetup {
                 }
             }
             break;
+            case "dishes":
+                return new ArrayList<>(StockManagement.dishes.keySet());
             case "postcodes":
-                return new ArrayList<>(Database.postcodeDistance.keySet());
+                return Database.postcodes;
             case "addToBasket":
             {
                 DishInfo info = (DishInfo) msg.getPayload();

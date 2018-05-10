@@ -1,6 +1,8 @@
 package common;
 
-public class Supplier extends Model {
+import java.io.Serializable;
+
+public class Supplier extends Model implements Serializable {
     private long distance;
 
     public Supplier(String name, long distance) {

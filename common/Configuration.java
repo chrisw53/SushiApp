@@ -87,9 +87,10 @@ public class Configuration {
                 break;
             case "POSTCODE":
                 Database.postcodeDistance.put(
-                        new Postcode(content[1]),
+                        content[1],
                         Long.parseLong(content[2])
                 );
+                Database.postcodes.add(new Postcode(content[1]));
                 break;
             case "USER":
                 Database.users.add(new User(
@@ -120,7 +121,6 @@ public class Configuration {
 
                     for (Dish d : StockManagement.dishes.keySet()) {
                         if (d.getName().equalsIgnoreCase(s.split("\\s\\*\\s")[1])) {
-                            System.out.println("Matched: " + d.getName());
                             dish = d;
                         }
                     }

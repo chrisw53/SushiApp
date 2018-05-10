@@ -49,9 +49,9 @@ public class DataPersistence {
     }
 
     private void postcodeOutput() {
-        for (Postcode p : Database.postcodeDistance.keySet()) {
+        for (String p : Database.postcodeDistance.keySet()) {
             String output = "POSTCODE:"
-                    + p.getName() + ":"
+                    + p + ":"
                     + Long.toString(Database.postcodeDistance.get(p));
             this.output.add(output);
         }

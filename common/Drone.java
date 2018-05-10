@@ -15,9 +15,8 @@ public class Drone extends Model implements Runnable {
     public void run() {
         while (true) {
             if (!Database.ordersProcessed.isEmpty()) {
-                Order order = getLatestOrder();
-                System.out.println("Delivering");
-                deliverOrder(order.getUser().getPostcode());
+                Order order = latestOrder();
+                deliverOrder(order.getUser().getPostcode().getName());
                 order.setStatus("Delivered");
             }
 
@@ -72,7 +71,6 @@ public class Drone extends Model implements Runnable {
         long timeToSupplier = ingredient.getSupplier().getDistance() / this.speed;
 
         try {
-            System.out.println(status);
             Thread.sleep(timeToSupplier);
             StockManagement.ingredients.get(ingredient).addQuant();
             status = "Idle";
@@ -81,20 +79,19 @@ public class Drone extends Model implements Runnable {
         }
     }
 
-    private void deliverOrder(Postcode postcode) {
+    private void deliverOrder(String postcode) {
         long deliveryTime = Database.postcodeDistance.get(postcode) / this.speed;
         status = "Delivering";
 
         try {
-            System.out.println(status);
-            Thread.sleep(deliveryTime);
+            Thread.sleep(deliveryTime * 1000);
             status = "Idle";
         } catch (InterruptedException e) {
             System.out.println("Drone delivery error: " + e);
         }
     }
 
-    public synchronized Order getLatestOrder() {
+    private synchronized Order latestOrder() {
         if (!Database.ordersProcessed.isEmpty()) {
             Order order = Database.ordersProcessed.get(0);
             Database.ordersProcessed.remove(0);

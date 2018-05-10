@@ -1,8 +1,9 @@
 package common;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Order extends Model {
+public class Order extends Model implements Serializable {
     private User user;
     private HashMap<Dish, Integer> dishes;
     private Boolean isComplete = false;

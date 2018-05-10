@@ -63,7 +63,13 @@ public class Client implements ClientInterface {
 
     @Override
     public List<Dish> getDishes() {
-        return new ArrayList<>(StockManagement.dishes.keySet());
+        try {
+            myComms.sendMessage(new Message("dishes"), this.outputStream);
+            return (ArrayList) myComms.receiveMessage(this.inputStream);
+        } catch (IOException e) {
+            System.out.println("Get dishes error: " + e);
+            return null;
+        }
     }
 
     @Override

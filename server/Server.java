@@ -13,10 +13,6 @@ public class Server implements ServerInterface{
         Configuration myConfig = new Configuration(filename);
         myConfig.start();
 
-        System.out.println(Database.ordersToBeProcessed.get(0).getName());
-        System.out.println(Database.ordersToBeProcessed.get(0).getDish().size());
-        System.out.println(Database.ordersToBeProcessed.get(0).getCost());
-
         for (Drone d : Database.drones) {
             Thread t = new Thread(d);
             t.start();
@@ -302,6 +298,7 @@ public class Server implements ServerInterface{
 
     @Override
     public String getDroneStatus(Drone drone) {
+        notifyUpdate();
         return drone.getStatus();
     }
 
@@ -353,7 +350,7 @@ public class Server implements ServerInterface{
     @Override
     public Number getOrderDistance(Order order) {
         notifyUpdate();
-        return Database.postcodeDistance.get(order.getUser().getPostcode());
+        return Database.postcodeDistance.get(order.getUser().getPostcode().getName());
     }
 
     @Override
@@ -369,18 +366,18 @@ public class Server implements ServerInterface{
 
     @Override
     public Number getOrderCost(Order order) {
-        System.out.println("Get cost: " + order.getCost());
         return order.getCost();
     }
 
     @Override
     public List<Postcode> getPostcodes() {
-        return new ArrayList<>(Database.postcodeDistance.keySet());
+        return Database.postcodes;
     }
 
     @Override
     public void addPostcode(String code, Number distance) {
-        Database.postcodeDistance.put(new Postcode(code), distance.longValue());
+        Database.postcodes.add(new Postcode(code));
+        Database.postcodeDistance.put(code, distance.longValue());
         notifyUpdate();
     }
 

@@ -1,8 +1,9 @@
 package common;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Dish extends Model {
+public class Dish extends Model implements Serializable {
     private String description;
     private int price;
     private Map<Ingredient, Number> recipe;
