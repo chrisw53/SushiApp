@@ -61,11 +61,11 @@ public class Configuration {
                 String[] receipeDetails = content[6].split(",");
 
                 for (String detail : receipeDetails) {
-                    int quant = Integer.parseInt(detail.split(" * ")[0]);
+                    int quant = Integer.parseInt(detail.split("\\s\\*\\s")[0]);
                     Ingredient ingredient = null;
 
                     for (Ingredient i : StockManagement.ingredients.keySet()) {
-                        if (i.getName().equalsIgnoreCase(detail.split(" * ")[1])) {
+                        if (i.getName().equalsIgnoreCase(detail.split("\\s\\*\\s")[1])) {
                             ingredient = i;
                         }
                     }
@@ -115,11 +115,12 @@ public class Configuration {
                 String[] individualDishes = content[2].split(",");
 
                 for (String s : individualDishes) {
-                    int quant = Integer.parseInt(s.split(" * ")[0]);
+                    int quant = Integer.parseInt(s.split("\\s\\*\\s")[0]);
                     Dish dish = null;
 
                     for (Dish d : StockManagement.dishes.keySet()) {
-                        if (d.getName().equalsIgnoreCase(s.split(" * ")[1])) {
+                        if (d.getName().equalsIgnoreCase(s.split("\\s\\*\\s")[1])) {
+                            System.out.println("Matched: " + d.getName());
                             dish = d;
                         }
                     }

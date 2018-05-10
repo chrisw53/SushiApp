@@ -6,10 +6,17 @@ public class Drone extends Model implements Runnable {
 
     public Drone(int speed) {
         this.speed = speed;
+    }
 
+    public String getName() {
+        return "Drone";
+    }
+
+    public void run() {
         while (true) {
             if (!Database.ordersProcessed.isEmpty()) {
                 Order order = getLatestOrder();
+                System.out.println("Delivering");
                 deliverOrder(order.getUser().getPostcode());
                 order.setStatus("Delivered");
             }
@@ -23,34 +30,19 @@ public class Drone extends Model implements Runnable {
                 }
             }
 
+
             if (
                     !Database.shouldRestockIngredient &&
-                    Database.ordersProcessed.isEmpty()
-            ) {
+                        Database.ordersProcessed.isEmpty()
+                ) {
                 synchronized (this) {
                     try {
-                        System.out.println("Drone waiting");
                         wait();
+                        System.out.println("Locked");
                     } catch (InterruptedException e) {
                         System.out.println("Drone wait error: " + e);
                     }
                 }
-            }
-        }
-
-    }
-
-    public String getName() {
-        return "Drone";
-    }
-
-    public void run() {
-        while (Database.shouldRestockIngredient) {
-            try {
-                Thread.sleep(1000);
-                monitorIngredient();
-            } catch (InterruptedException e) {
-                System.out.println("Drone monitor error: " + e);
             }
         }
     }
@@ -80,6 +72,7 @@ public class Drone extends Model implements Runnable {
         long timeToSupplier = ingredient.getSupplier().getDistance() / this.speed;
 
         try {
+            System.out.println(status);
             Thread.sleep(timeToSupplier);
             StockManagement.ingredients.get(ingredient).addQuant();
             status = "Idle";
@@ -93,6 +86,7 @@ public class Drone extends Model implements Runnable {
         status = "Delivering";
 
         try {
+            System.out.println(status);
             Thread.sleep(deliveryTime);
             status = "Idle";
         } catch (InterruptedException e) {
@@ -100,9 +94,13 @@ public class Drone extends Model implements Runnable {
         }
     }
 
-    private synchronized Order getLatestOrder() {
-        Order order = Database.ordersProcessed.get(0);
-        Database.ordersProcessed.remove(0);
-        return order;
+    public synchronized Order getLatestOrder() {
+        if (!Database.ordersProcessed.isEmpty()) {
+            Order order = Database.ordersProcessed.get(0);
+            Database.ordersProcessed.remove(0);
+            return order;
+        }
+
+        return null;
     }
 }

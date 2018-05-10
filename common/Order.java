@@ -28,8 +28,11 @@ public class Order extends Model {
 
     public int getCost() {
         int cost = 0;
-        for (Dish d : dishes.keySet()) {
-            cost += d.getPrice() * dishes.get(d);
+
+        if (!dishes.isEmpty()) {
+            for (Dish d : dishes.keySet()) {
+                cost += d.getPrice() * dishes.get(d);
+            }
         }
 
         return cost;

@@ -57,7 +57,7 @@ public class Staff extends Model implements Runnable {
     }
 
     public String getName() {
-        return "Staff";
+        return name;
     }
 
     public String getStatus() {
@@ -81,6 +81,7 @@ public class Staff extends Model implements Runnable {
 
         try {
             status = "Cooking";
+            System.out.println(status);
             Thread.sleep(sleepTimer);
             // adds new dish
             StockManagement.dishes.get(dish).addQuant();
@@ -97,8 +98,12 @@ public class Staff extends Model implements Runnable {
     }
 
     public synchronized Order getLatestOrder() {
-        Order order = Database.ordersToBeProcessed.get(0);
-        Database.ordersToBeProcessed.remove(0);
-        return order;
+        if (!Database.ordersToBeProcessed.isEmpty()) {
+            Order order = Database.ordersToBeProcessed.get(0);
+            Database.ordersToBeProcessed.remove(0);
+            return order;
+        }
+
+        return null;
     }
 }

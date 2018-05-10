@@ -13,6 +13,10 @@ public class Server implements ServerInterface{
         Configuration myConfig = new Configuration(filename);
         myConfig.start();
 
+        System.out.println(Database.ordersToBeProcessed.get(0).getName());
+        System.out.println(Database.ordersToBeProcessed.get(0).getDish().size());
+        System.out.println(Database.ordersToBeProcessed.get(0).getCost());
+
         for (Drone d : Database.drones) {
             Thread t = new Thread(d);
             t.start();
@@ -22,8 +26,6 @@ public class Server implements ServerInterface{
             Thread t = new Thread(s);
             t.start();
         }
-
-        notifyUpdate();
     }
 
     @Override
@@ -86,8 +88,8 @@ public class Server implements ServerInterface{
                         0
                 )
         );
-        notifyUpdate();
 
+        notifyUpdate();
         return newDish;
     }
 
@@ -274,7 +276,6 @@ public class Server implements ServerInterface{
         }
 
         notifyUpdate();
-
         return drone;
     }
 
@@ -320,7 +321,6 @@ public class Server implements ServerInterface{
         }
 
         notifyUpdate();
-
         return staff;
     }
 
@@ -332,6 +332,7 @@ public class Server implements ServerInterface{
 
     @Override
     public String getStaffStatus(Staff staff) {
+        notifyUpdate();
         return staff.getStatus();
     }
 
@@ -351,11 +352,13 @@ public class Server implements ServerInterface{
 
     @Override
     public Number getOrderDistance(Order order) {
+        notifyUpdate();
         return Database.postcodeDistance.get(order.getUser().getPostcode());
     }
 
     @Override
     public boolean isOrderComplete(Order order) {
+        notifyUpdate();
         return order.getIsComplete();
     }
 
@@ -366,6 +369,7 @@ public class Server implements ServerInterface{
 
     @Override
     public Number getOrderCost(Order order) {
+        System.out.println("Get cost: " + order.getCost());
         return order.getCost();
     }
 
