@@ -3,6 +3,7 @@ package common;
 import java.io.Serializable;
 
 public class Supplier extends Model implements Serializable {
+    private String name;
     private long distance;
 
     public Supplier(String name, long distance) {

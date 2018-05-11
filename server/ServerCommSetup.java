@@ -2,12 +2,11 @@ package server;
 
 import common.*;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.*;
 
 public class ServerCommSetup {
-    private HashMap<User, ArrayList<DishInfo>> basket = new HashMap<>();
-
     public ServerCommSetup() {
         try {
             Comms myComms = new Comms();
@@ -21,6 +20,7 @@ public class ServerCommSetup {
         switch (msg.getType()) {
             case "register":
                 Database.users.add((User) msg.getPayload());
+                Database.basket.put((User) msg.getPayload(), new ArrayList<>());
                 break;
             case "login":
             {
@@ -41,22 +41,28 @@ public class ServerCommSetup {
             case "addToBasket":
             {
                 DishInfo info = (DishInfo) msg.getPayload();
-                if (basket.containsKey(info.getUser())) {
-                    basket.get(info.getUser()).add(info);
+                if (Database.basket.containsKey(info.getUser())) {
+                    Database.basket.get(info.getUser()).add(info);
                 } else {
                     ArrayList<DishInfo> temp = new ArrayList<>();
                     temp.add(info);
-                    basket.put(info.getUser(), temp);
+                    Database.basket.put(info.getUser(), temp);
                 }
             }
             break;
             case "basket":
             {
-                User user = (User) msg.getPayload();
-                HashMap<Dish, Integer> temp = new HashMap<>();
+                User user = null;
+                HashMap<Dish, Number> temp = new HashMap<>();
 
-                for (DishInfo d : basket.get(user)) {
-                    temp.put(d.getDish(), (int) d.getQuant());
+                for (User u : Database.basket.keySet()) {
+                    if (u.getName().equalsIgnoreCase(((User) msg.getPayload()).getName())) {
+                        user = u;
+                    }
+                }
+
+                for (DishInfo d : Database.basket.get(user)) {
+                    temp.put(d.getDish(), d.getQuant());
                 }
 
                 return temp;
@@ -64,9 +70,9 @@ public class ServerCommSetup {
             case "basketCost":
             {
                 User user = (User) msg.getPayload();
-                if (basket.containsKey(user)) {
+                if (Database.basket.containsKey(user)) {
                     int cost = 0;
-                    for (DishInfo d : basket.get(user)) {
+                    for (DishInfo d : Database.basket.get(user)) {
                         cost += (d.getDish().getPrice() * (int) d.getQuant());
                     }
                     return cost;
@@ -77,9 +83,16 @@ public class ServerCommSetup {
             case "updateBasket":
             {
                 DishInfo info = (DishInfo) msg.getPayload();
+                User user = null;
 
-                for (DishInfo d : basket.get(info.getUser())) {
-                    if (d.getDish() == info.getDish()) {
+                for (User u : Database.basket.keySet()) {
+                    if (u.getName().equalsIgnoreCase(info.getUser().getName())) {
+                        user = u;
+                    }
+                }
+
+                for (DishInfo d : Database.basket.get(user)) {
+                    if (d.getDish().getName().equalsIgnoreCase(info.getDish().getName())) {
                         d.setQuant(info.getQuant());
                     }
                 }
@@ -88,7 +101,7 @@ public class ServerCommSetup {
             case "clearBasket":
             {
                 User user = (User) msg.getPayload();
-                basket.get(user).clear();
+                Database.basket.get(user).clear();
             }
             break;
             case "orders":
@@ -111,17 +124,26 @@ public class ServerCommSetup {
                 return userOrder;
             }
             case "cancelOrder":
-                Database.ordersToBeProcessed.remove(msg.getPayload());
+                Order order = null;
+
+                for (Order o : Database.ordersToBeProcessed) {
+                    if (o.getUuid().equals(((Order) msg.getPayload()).getUuid())) {
+                        order = o;
+                    }
+                }
+
+                Database.ordersToBeProcessed.remove(order);
                 break;
             case "checkout":
             {
                 User user = (User) msg.getPayload();
                 HashMap<Dish, Integer> dishes = new HashMap<>();
-                for (DishInfo d : basket.get(user)) {
+                for (DishInfo d : Database.basket.get(user)) {
                     dishes.put(d.getDish(), (int) d.getQuant());
                 }
-                basket.remove(user);
-                Database.ordersToBeProcessed.add(new Order(user, dishes));
+                Database.basket.remove(user);
+                Order newOrder = new Order(user, dishes);
+                Database.ordersToBeProcessed.add(newOrder);
 
                 for (Staff s : Database.staffs) {
                     synchronized (s) {

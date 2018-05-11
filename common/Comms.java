@@ -2,7 +2,7 @@ package common;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Function;
 
 public class Comms {
@@ -63,7 +63,6 @@ public class Comms {
 
         try {
             msg = inputStream.readObject();
-            System.out.println(msg == null);
         } catch (ClassNotFoundException e) {
             System.out.println("What did you type? " + e);
         }
@@ -95,7 +94,8 @@ class ClientHandler extends Thread {
         while (true) {
              try {
                  received = (Message) inputStream.readObject();
-                 outputStream.writeObject(logic.apply(received));
+                 Object output = logic.apply(received);
+                 outputStream.writeObject(output);
                  outputStream.flush();
              } catch (IOException e) {
                  // System.out.println("StockManagement receive I/O Error: " + e);

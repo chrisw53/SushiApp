@@ -383,7 +383,8 @@ public class Server implements ServerInterface{
 
     @Override
     public void removePostcode(Postcode postcode) throws UnableToDeleteException {
-        Database.postcodeDistance.remove(postcode);
+        Database.postcodes.remove(postcode);
+        Database.postcodeDistance.remove(postcode.getName());
         notifyUpdate();
     }
 

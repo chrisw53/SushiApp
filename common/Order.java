@@ -8,11 +8,16 @@ public class Order extends Model implements Serializable {
     private HashMap<Dish, Integer> dishes;
     private Boolean isComplete = false;
     private String status;
+    private UUID uuid = UUID.randomUUID();
 
     public Order(User user, HashMap<Dish, Integer> dishes) {
         this.user = user;
         this.dishes = dishes;
         this.status = "Processed";
+    }
+
+    public UUID getUuid() {
+        return this.uuid;
     }
 
     public String getName() {

@@ -93,12 +93,11 @@ public class Configuration {
                 Database.postcodes.add(new Postcode(content[1]));
                 break;
             case "USER":
-                Database.users.add(new User(
-                        content[1],
-                        content[2],
-                        content[3],
-                        new Postcode(content[4])
-                ));
+                {
+                    User user = new User(content[1], content[2], content[3], new Postcode(content[4]));
+                    Database.users.add(user);
+                    Database.basket.put(user, new ArrayList<>());
+                }
                 break;
             case "ORDER":
             case "UNPROCESSEDORDER":

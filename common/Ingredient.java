@@ -3,6 +3,7 @@ package common;
 import java.io.Serializable;
 
 public class Ingredient extends Model implements Serializable {
+    private String name;
     private Supplier supplier;
     private String unit;
 

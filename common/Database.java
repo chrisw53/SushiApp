@@ -11,6 +11,7 @@ public class Database {
     public static ArrayList<Order> ordersProcessed = new ArrayList<>();
     public static ArrayList<Drone> drones = new ArrayList<>();
     public static ArrayList<Staff> staffs = new ArrayList<>();
+    public static HashMap<User, ArrayList<DishInfo>> basket = new HashMap<>();
     public static Boolean shouldRestockDish = true;
     public static Boolean shouldRestockIngredient = true;
 

@@ -35,8 +35,6 @@ public class Client implements ClientInterface {
         return myUser;
     }
 
-
-    // TODO: Check login fail scenario
     @Override
     public User login(String username, String password) {
         try {
@@ -65,7 +63,9 @@ public class Client implements ClientInterface {
     public List<Dish> getDishes() {
         try {
             myComms.sendMessage(new Message("dishes"), this.outputStream);
-            return (ArrayList) myComms.receiveMessage(this.inputStream);
+            ArrayList<Dish> result = (ArrayList<Dish>) myComms.receiveMessage(this.inputStream);
+            System.out.println(result.get(0).getName());
+            return result;
         } catch (IOException e) {
             System.out.println("Get dishes error: " + e);
             return null;
@@ -109,7 +109,7 @@ public class Client implements ClientInterface {
         try {
             DishInfo newDish = new DishInfo(user, dish, quantity);
             myComms.sendMessage(new Message("addToBasket", newDish), this.outputStream);
-            notifyUpdate();
+            myComms.receiveMessage(inputStream);
         } catch (IOException e) {
             System.out.println("Add to basket error: " + e);
         }
@@ -120,7 +120,7 @@ public class Client implements ClientInterface {
         try {
             DishInfo updateDish = new DishInfo(user, dish, quantity);
             myComms.sendMessage(new Message("updateBasket", updateDish), this.outputStream);
-            notifyUpdate();
+            myComms.receiveMessage(inputStream);
         } catch (IOException e) {
             System.out.println("Update basket error: " + e);
         }
@@ -130,7 +130,6 @@ public class Client implements ClientInterface {
     public Order checkoutBasket(User user) {
         try {
             myComms.sendMessage(new Message("checkout", user), this.outputStream);
-            notifyUpdate();
             return (Order) myComms.receiveMessage(this.inputStream);
         } catch (IOException e) {
             System.out.println("Check out error: " + e);
@@ -142,6 +141,7 @@ public class Client implements ClientInterface {
     public void clearBasket(User user) {
         try {
             myComms.sendMessage(new Message("clearBasket", user), this.outputStream);
+            myComms.receiveMessage(inputStream);
             notifyUpdate();
         } catch (IOException e) {
             System.out.println("Clear basket error: " + e);
@@ -178,6 +178,7 @@ public class Client implements ClientInterface {
     public void cancelOrder(Order order) {
         try {
             myComms.sendMessage(new Message("cancelOrder", order), this.outputStream);
+            myComms.receiveMessage(inputStream);
             notifyUpdate();
         } catch (IOException e) {
             System.out.println("Cancel order error: " + e);
