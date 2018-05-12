@@ -14,9 +14,20 @@ public class ServerApplication {
     }
 
     public static void main(String[] args) {
+        Configuration initConfig = new Configuration("Backup.txt");
+        initConfig.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutting down, saving data...");
+            DataPersistence backup = new DataPersistence();
+            backup.write();
+            System.out.println("Data saved!");
+        }));
+
         ServerApplication serverWindow = new ServerApplication();
         Server serverInterface = serverWindow.initialise();
         serverWindow.launchGUI(serverInterface);
         ServerCommSetup commSetup = new ServerCommSetup();
+
     }
 }

@@ -11,6 +11,21 @@ public class Configuration {
     }
 
     public void start() {
+        // These clears the existing configs
+        Database.ordersToBeProcessed.clear();
+        Database.ordersProcessed.clear();
+        Database.basket.clear();
+        Database.postcodes.clear();
+        Database.suppliers.clear();
+        Database.drones.clear();
+        Database.staffs.clear();
+        Database.users.clear();
+        Database.postcodeDistance.clear();
+        Database.shouldRestockDish = true;
+        Database.shouldRestockIngredient = true;
+        StockManagement.dishes.clear();
+        StockManagement.ingredients.clear();
+
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
 

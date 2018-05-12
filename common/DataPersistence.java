@@ -2,7 +2,6 @@ package common;
 import java.io.*;
 import java.util.*;
 
-// TODO: Implement this inside Client & Server App
 public class DataPersistence {
     private ArrayList<String> output = new ArrayList<>();
     private PrintWriter writer;
@@ -11,21 +10,23 @@ public class DataPersistence {
         this.writer = createFile("Backup.txt");
     }
 
-    private void write() {
+    public void write() {
         supplierOutput();
+        ingredientOutput();
+        dishOutput();
         postcodeOutput();
         userOutput();
         unprocessedOrderOutput();
         processedOrderOutput();
+        stockOutput();
         dronesOutput();
         staffsOutput();
-        stockOutput();
-        dishOutput();
-        ingredientOutput();
 
         for (String s : output) {
             writer.println(s);
         }
+
+        writer.close();
     }
 
     private PrintWriter createFile(String path) {
