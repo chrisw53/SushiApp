@@ -18,9 +18,4 @@ public class Supplier extends Model implements Serializable {
     public long getDistance() {
         return this.distance;
     }
-
-    void setDistance(long distance) {
-        notifyUpdate("distance", this.distance, distance);
-        this.distance = distance;
-    }
 }

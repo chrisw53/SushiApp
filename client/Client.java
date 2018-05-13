@@ -11,6 +11,11 @@ public class Client implements ClientInterface {
     private Comms myComms = new Comms();
     private ArrayList<UpdateListener> updateListeners = new ArrayList<>();
 
+    /**
+     * The constructor runs the clientSetup method in the comms toolbelt
+     * and stores the unique input and output streams of the client in the
+     * client class variables
+     */
     public Client() {
         try {
             ClientStreams myStreams = myComms.clientSetUp();
@@ -28,6 +33,8 @@ public class Client implements ClientInterface {
 
         try {
             myComms.sendMessage(msg, this.outputStream);
+            // This is to clear the null returned in the inputStream pipeline
+            myComms.receiveMessage(inputStream);
         } catch (IOException e) {
             System.out.println("Register send message error: " + e);
         }
@@ -35,12 +42,14 @@ public class Client implements ClientInterface {
         return myUser;
     }
 
+    //
     @Override
     public User login(String username, String password) {
         try {
             String[] loginInfo = { username, password };
             myComms.sendMessage(new Message("login", loginInfo), this.outputStream);
 
+            // Blocking until the user is passed back from the server
             return (User) myComms.receiveMessage(this.inputStream);
         } catch (IOException e) {
             System.out.println("Login error: " + e);
@@ -63,9 +72,7 @@ public class Client implements ClientInterface {
     public List<Dish> getDishes() {
         try {
             myComms.sendMessage(new Message("dishes"), this.outputStream);
-            ArrayList<Dish> result = (ArrayList<Dish>) myComms.receiveMessage(this.inputStream);
-            System.out.println(result.get(0).getName());
-            return result;
+            return (ArrayList<Dish>) myComms.receiveMessage(this.inputStream);
         } catch (IOException e) {
             System.out.println("Get dishes error: " + e);
             return null;
@@ -107,6 +114,8 @@ public class Client implements ClientInterface {
     @Override
     public void addDishToBasket(User user, Dish dish, Number quantity) {
         try {
+            // Gathers all the information about the dish into a container class to send as the
+            // payload of the Message
             DishInfo newDish = new DishInfo(user, dish, quantity);
             myComms.sendMessage(new Message("addToBasket", newDish), this.outputStream);
             myComms.receiveMessage(inputStream);
@@ -118,6 +127,8 @@ public class Client implements ClientInterface {
     @Override
     public void updateDishInBasket(User user, Dish dish, Number quantity) {
         try {
+            // Gathers all the information about the dish into a container class to send as the
+            // payload of the Message
             DishInfo updateDish = new DishInfo(user, dish, quantity);
             myComms.sendMessage(new Message("updateBasket", updateDish), this.outputStream);
             myComms.receiveMessage(inputStream);

@@ -14,9 +14,11 @@ public class ServerApplication {
     }
 
     public static void main(String[] args) {
+        // Loads up any backup if there are any
         Configuration initConfig = new Configuration("Backup.txt");
         initConfig.start();
 
+        // Set up a listener for shutdown and implement DataPersistence for it
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down, saving data...");
             DataPersistence backup = new DataPersistence();
@@ -27,6 +29,8 @@ public class ServerApplication {
         ServerApplication serverWindow = new ServerApplication();
         Server serverInterface = serverWindow.initialise();
         serverWindow.launchGUI(serverInterface);
+
+        // Set up the serverComm last because it's a blocking while true loop
         ServerCommSetup commSetup = new ServerCommSetup();
 
     }

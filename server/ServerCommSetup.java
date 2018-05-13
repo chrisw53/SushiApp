@@ -2,10 +2,12 @@ package server;
 
 import common.*;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Helper class that sets up the server response to requests from clients
+ */
 public class ServerCommSetup {
     public ServerCommSetup() {
         try {
@@ -16,6 +18,13 @@ public class ServerCommSetup {
         }
     }
 
+    /**
+     * Logic callback function that handles returning the proper information
+     * to the requests from clients
+     * @param msg incoming request
+     * @return an object in response to the request. If the request does not
+     * ask for information in return, then return null
+     */
     private Object serverLogic(Message msg) {
         switch (msg.getType()) {
             case "register":
@@ -55,6 +64,7 @@ public class ServerCommSetup {
                 User user = null;
                 HashMap<Dish, Number> temp = new HashMap<>();
 
+                // Identify the user
                 for (User u : Database.basket.keySet()) {
                     if (u.getName().equalsIgnoreCase(((User) msg.getPayload()).getName())) {
                         user = u;
@@ -72,6 +82,7 @@ public class ServerCommSetup {
                 User user = (User) msg.getPayload();
                 if (Database.basket.containsKey(user)) {
                     int cost = 0;
+                    // Calculates total cost form the cost of each item times quantity
                     for (DishInfo d : Database.basket.get(user)) {
                         cost += (d.getDish().getPrice() * (int) d.getQuant());
                     }
@@ -138,13 +149,17 @@ public class ServerCommSetup {
             {
                 User user = (User) msg.getPayload();
                 HashMap<Dish, Integer> dishes = new HashMap<>();
+
                 for (DishInfo d : Database.basket.get(user)) {
                     dishes.put(d.getDish(), (int) d.getQuant());
                 }
-                Database.basket.remove(user);
+
+                // Clears user basket
+                Database.basket.get(user).clear();
                 Order newOrder = new Order(user, dishes);
                 Database.ordersToBeProcessed.add(newOrder);
 
+                // Notifies the staff upon new order taken
                 for (Staff s : Database.staffs) {
                     synchronized (s) {
                         s.notify();

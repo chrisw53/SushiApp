@@ -3,14 +3,20 @@ import java.io.*;
 import java.util.*;
 
 public class DataPersistence {
+    // Stores the output
     private ArrayList<String> output = new ArrayList<>();
     private PrintWriter writer;
 
+    /**
+     * Sets the path for where the backup info is written to
+     */
     public DataPersistence() {
         this.writer = createFile("Backup.txt");
     }
 
     public void write() {
+        // These formats all the info into Strings readable by Configuration
+        // in the right order and shove them into output ArrayList
         supplierOutput();
         ingredientOutput();
         dishOutput();
@@ -22,6 +28,7 @@ public class DataPersistence {
         dronesOutput();
         staffsOutput();
 
+        // Outputs the info into a pre-defined writer
         for (String s : output) {
             writer.println(s);
         }
@@ -29,6 +36,11 @@ public class DataPersistence {
         writer.close();
     }
 
+    /**
+     * Helper method that creates a writable file
+     * @param path The path of the backup file
+     * @return A PrintWriter instance
+     */
     private PrintWriter createFile(String path) {
         try {
             File configFile = new File(path);
@@ -39,6 +51,7 @@ public class DataPersistence {
             System.out.println("Error writing to persistent file: " + e);
         }
 
+        // Placeholder return statement if there's an error
         return null;
     }
 

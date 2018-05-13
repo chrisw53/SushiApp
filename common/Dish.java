@@ -3,6 +3,7 @@ package common;
 import java.io.Serializable;
 import java.util.*;
 
+// Implements Serializable so it can be sent via ObjectInputStream and ObjectOutputStream
 public class Dish extends Model implements Serializable {
     private String name;
     private String description;
@@ -14,7 +15,7 @@ public class Dish extends Model implements Serializable {
             String description,
             int price,
             HashMap<Ingredient, Number> recipe
-        ) {
+    ) {
         this.name = name;
         this.description = description;
         this.price = price;
@@ -45,27 +46,11 @@ public class Dish extends Model implements Serializable {
         this.recipe = recipe;
     }
 
-    void changeIngredientAmount(Ingredient key, int amount) {
-        HashMap<Ingredient, Number> oldRecipe = new HashMap<>(this.recipe);
-        this.recipe.replace(key, amount);
-        notifyUpdate("recipe", oldRecipe, this.recipe);
-    }
-
     public int getPrice() {
         return this.price;
     }
 
-    void setPrice(int price) {
-        notifyUpdate("price", this.price, price);
-        this.price = price;
-    }
-
     public String getDescription() {
         return this.description;
-    }
-
-    void setDescription(String description) {
-        notifyUpdate("description", this.description, description);
-        this.description = description;
     }
 }

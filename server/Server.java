@@ -5,6 +5,9 @@ import common.*;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Implementations of the ServerInterface method
+ */
 public class Server implements ServerInterface{
     private ArrayList<UpdateListener> updateListeners = new ArrayList<>();
 
@@ -13,11 +16,13 @@ public class Server implements ServerInterface{
         Configuration myConfig = new Configuration(filename);
         myConfig.start();
 
+        // Starts the Drone threads
         for (Drone d : Database.drones) {
             Thread t = new Thread(d);
             t.start();
         }
 
+        // Starts the Staff threads
         for (Staff s : Database.staffs) {
             Thread t = new Thread(s);
             t.start();
@@ -28,6 +33,7 @@ public class Server implements ServerInterface{
     public void setRestockingIngredientsEnabled(boolean enabled) {
         Database.shouldRestockIngredient = enabled;
 
+        // Notifies the drones if it was switched from false to true
         if (enabled) {
             for (Drone d : Database.drones) {
                 synchronized (d) {
@@ -41,6 +47,7 @@ public class Server implements ServerInterface{
     public void setRestockingDishesEnabled(boolean enabled) {
         Database.shouldRestockDish = enabled;
 
+        // Notifies the staffs if it was switched from false to true
         if (enabled) {
             for (Staff s : Database.staffs) {
                 synchronized (s) {
@@ -277,17 +284,7 @@ public class Server implements ServerInterface{
 
     @Override
     public void removeDrone(Drone drone) throws UnableToDeleteException {
-        // stops all drone threads
-        Database.shouldRestockIngredient = false;
-
         Database.drones.remove(drone);
-
-        // restart the remaining drones
-        for (Drone d : Database.drones) {
-            Thread t = new Thread(d);
-            t.start();
-        }
-
         notifyUpdate();
     }
 
@@ -329,12 +326,12 @@ public class Server implements ServerInterface{
 
     @Override
     public String getStaffStatus(Staff staff) {
-        notifyUpdate();
         return staff.getStatus();
     }
 
     @Override
     public List<Order> getOrders() {
+        // Merges the two orders list into one big list
         ArrayList<Order> orders = new ArrayList<>(Database.ordersToBeProcessed);
         orders.addAll(Database.ordersProcessed);
 

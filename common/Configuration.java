@@ -6,10 +6,17 @@ import java.util.*;
 public class Configuration {
     private String path;
 
+    /**
+     * Constructor that sets the path of the config file
+     * @param configFile String representing the path of the config file
+     */
     public Configuration(String configFile) {
         this.path = configFile;
     }
 
+    /**
+     * Init method for the configuration class to start parsing
+     */
     public void start() {
         // These clears the existing configs
         Database.ordersToBeProcessed.clear();
@@ -26,6 +33,7 @@ public class Configuration {
         StockManagement.dishes.clear();
         StockManagement.ingredients.clear();
 
+        // Establishes a new file in the path provided or override the existing file
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
 
@@ -40,7 +48,12 @@ public class Configuration {
         }
     }
 
+    /**
+     * Main parsing logic
+     * @param line Each line of the config file
+     */
     private void parse(String line) {
+        // Split string into type (left of ":") and payload (right of ":")
         String[] content = line.split(":");
 
         switch (content[0]) {
@@ -50,12 +63,14 @@ public class Configuration {
             case "INGREDIENT":
             {
                 Supplier supplier = null;
+                // Matches the supplier name to existing suppliers
                 for (Supplier s : Database.suppliers) {
                     if (s.getName().equalsIgnoreCase(content[3])) {
                         supplier = s;
                     }
                 }
 
+                // Create new Ingredient and stockInfo to be stored
                 Ingredient ingredient = new Ingredient(
                         content[1],
                         content[2],
@@ -72,10 +87,11 @@ public class Configuration {
                 break;
             case "DISH":
             {
-                HashMap<Ingredient, Number> receipe = new HashMap<>();
-                String[] receipeDetails = content[6].split(",");
+                HashMap<Ingredient, Number> recipe = new HashMap<>();
+                String[] recipeDetails = content[6].split(",");
 
-                for (String detail : receipeDetails) {
+                // Parsing through the recipe section and add them to the recipe hashmap
+                for (String detail : recipeDetails) {
                     int quant = Integer.parseInt(detail.split("\\s\\*\\s")[0]);
                     Ingredient ingredient = null;
 
@@ -85,14 +101,15 @@ public class Configuration {
                         }
                     }
 
-                    receipe.put(ingredient, quant);
+                    recipe.put(ingredient, quant);
                 }
 
+                // Store the dish and stockInfo. Note, stockInfo always start with quant at 0
                 StockManagement.dishes.put(new Dish(
                         content[1],
                         content[2],
                         Integer.parseInt(content[3]),
-                        receipe
+                        recipe
                 ), new StockInfo(
                         Integer.parseInt(content[4]),
                         Integer.parseInt(content[5]),
@@ -101,10 +118,12 @@ public class Configuration {
             }
                 break;
             case "POSTCODE":
+                // This HashMap is so that it's easier to search for postcode distance
                 Database.postcodeDistance.put(
                         content[1],
                         Long.parseLong(content[2])
                 );
+                // This ArrayList is to store the Postcode instances
                 Database.postcodes.add(new Postcode(content[1]));
                 break;
             case "USER":
@@ -121,6 +140,7 @@ public class Configuration {
                 User user = null;
                 HashMap<Dish, Integer> orderDetail = new HashMap<>();
 
+                // Identify the user
                 for (User u : Database.users) {
                     if (u.getName().equalsIgnoreCase(content[1])) {
                         user = u;
@@ -129,6 +149,7 @@ public class Configuration {
 
                 String[] individualDishes = content[2].split(",");
 
+                // Parse through the dish section and add each dish to the order
                 for (String s : individualDishes) {
                     int quant = Integer.parseInt(s.split("\\s\\*\\s")[0]);
                     Dish dish = null;
@@ -142,6 +163,7 @@ public class Configuration {
                     orderDetail.put(dish, quant);
                 }
 
+                // See Database for the difference between orderProcessed & ordersToBeProcessed
                 if (content[0].equalsIgnoreCase("PROCESSEDORDER")) {
                     Database.ordersProcessed.add(new Order(user, orderDetail));
                 } else {
@@ -152,6 +174,7 @@ public class Configuration {
             case "STOCK":
             {
                 boolean matched = false;
+                // Identify the Ingredient if it's an ingredient and set its initial stock
                 for (Ingredient i : StockManagement.ingredients.keySet()) {
                     if (i.getName().equalsIgnoreCase(content[1])) {
                         StockManagement
@@ -162,6 +185,7 @@ public class Configuration {
                     }
                 }
 
+                // Otherwise identify the dish and set its initial stock
                 if (!matched) {
                     for (Dish d : StockManagement.dishes.keySet()) {
                         if (d.getName().equalsIgnoreCase(content[1])) {

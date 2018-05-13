@@ -2,6 +2,10 @@ package common;
 
 import java.io.Serializable;
 
+/**
+ * Container class that contains the stock information of an ingredient
+ * or a dish
+ */
 public class StockInfo implements Serializable {
     private int threshold;
     private int amountToAdd;
@@ -26,18 +30,22 @@ public class StockInfo implements Serializable {
         return this.amountToAdd;
     }
 
+    // Synchronized due to possibility of concurrent access
     public synchronized int getQuant() {
         return this.quant;
     }
 
+    // Synchronized due to possibility of concurrent access
     synchronized void addQuant() {
         this.quant += this.amountToAdd;
     }
 
+    // Synchronized due to possibility of concurrent access
     synchronized void addQuant(int quant) {
         this.quant += quant;
     }
 
+    // Synchronized due to possibility of concurrent access
     public synchronized void setQuant(int quant) {
         this.quant = quant;
     }

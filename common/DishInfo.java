@@ -2,6 +2,10 @@ package common;
 
 import java.io.Serializable;
 
+/**
+ * Container class that contains represents the order information
+ * of a single dish
+ */
 public class DishInfo implements Serializable {
     private User user;
     private Dish dish;
