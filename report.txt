@@ -1,0 +1,227 @@
+Part 1: Ingredients, Suppliers and Sushi Dishes
+
+List of classes implemented (written as package.class)
+- common.Ingredient
+- common.Dish
+- common.Supplier
+
+List of methods implemented (written as package.class.method):
+- common.Ingredient.getName
+- common.Ingredient.getSupplier
+- common.Ingredient.getUnit
+- common.Dish.getName
+- common.Dish.getRecipe
+- common.Dish.addIngredient
+- common.Dish.deleteIngredient
+- common.Dish.setRecipe
+- common.Dish.getPrice
+- common.Dish.getDescription
+- common.Supplier.getName
+- common.Supplier.getDistance
+
+1 paragraph description of what you did:
+Implemented the three class as instructed and put in relevant getters and setters
+
+-----------------
+
+Part 2: Stock Management
+
+List of classes implemented (written as package.class)
+common.StockManagement
+common.StockInfo
+
+List of methods implemented (written as package.class.method):
+common.StockInfo.setRestockLevel
+common.StockInfo.getThreshold
+common.StockInfo.getAmountToAdd
+common.StockInfo.getQuant
+common.StockInfo.addQuant
+common.StockInfo.setQuant
+
+1 paragraph description of what you did:
+StockManagement is just a simple database class with 2 static variables to keep track
+of the dish and ingredient stock levels. The monitoring and restocking are tasked to
+Staff and Drone class respectively
+
+-----------------
+
+Part 3: Kitchen Staff
+
+List of classes implemented (written as package.class)
+common.Staff
+
+List of methods implemented (written as package.class.method):
+common.Staff.run
+common.Staff.getName
+common.Staff.getStatus
+common.Staff.monitorDish
+common.Staff.makeNewDish
+common.Staff.latestOrder
+
+1 paragraph description of what you did:
+Staff is just a java thread that runs a while true loop that checks the dish stock
+every second. If a dish's stock falls below its restock threshold, then the staff
+restock the dish by the dish's restock amount. Staff has all the proper synchronization
+protection against any possibility of data inconsistency. See the comments in the class
+to get more details on how it works.
+
+-----------------
+
+Part 4: Communication Layer
+
+List of classes implemented (written as package.class)
+common.Comms
+common.Comms.ClientHandler
+common.Message
+server.ServerCommSetup
+common.Database
+common.ClientStream
+
+List of methods implemented (written as package.class.method):
+common.Comms.serverSetup
+common.Comms.clientSetup
+common.Comms.sendMessage
+common.Comms.receiveMessage
+common.Comms.ClientHandler.run
+common.Message.getType
+common.Message.getPayload
+server.ServerCommSetup.serverLogic
+common.ClientStream.getInputStream
+common.ClientStream.getOutputStream
+
+1 paragraph description of what you did:
+The basic model I built was that client is the frontend, server is the backend and in
+the middle, there is a database made up of static variables as the single source of truth
+for all data related to the app. Then the Comms class is used as a tunnel that helps
+server and client communicate. The key is that all the communication logic are extrapolated
+away from the frontend and the backend. The workflow for client to get information is
+client request --> comms --> server response --> reach into database for info --> comms --> client.
+Given that the backend and frontend are on different JVMs, the database only exists on server
+side. See the comments in Comms and ServerCommSetup for more detailed explanation.
+
+-----------------
+
+Part 5: Client
+
+List of classes implemented (written as package.class)
+common.Client
+common.Postcode
+common.Order
+common.User
+common.DishInfo
+ClientApplication
+
+List of methods implemented (written as package.class.method):
+All the methods contained in ClientInterface
+common.Postcode.getName
+common.Order.getName
+common.Order.getUuid
+common.Order.getDish
+common.Order.getUser
+common.Order.getCost
+common.Order.getIsComplete
+common.Order.getStatus
+common.Order.setIsComplete
+common.Order.setStatus
+common.User.getName
+common.User.getPassword
+common.User.getAddress
+common.User.getPostcode
+common.DishInfo.getUser
+common.DishInfo.getDish
+common.DishInfo.getQuant
+common.DishInfo.setQuant
+ClientApplication.initialise
+ClientApplication.launchGUI
+
+1 paragraph description of what you did:
+As explained above, Client's only job is to send out request and wait for the server to respond
+with the information. Each order class is in charge of a single order by a single user. User class
+is just a simple data class with the user information and DishInfo is a helper class that contains
+the information about a single dish in an order (user, dish and quantity).
+
+-----------------
+
+Part 6: Drones
+
+List of classes implemented (written as package.class)
+common.Drone
+
+List of methods implemented (written as package.class.method):
+common.Drone.getName
+common.Drone.run
+common.Drone.getStatus
+common.Drone.getSpeed
+common.Drone.monitorIngredient
+common.Drone.restockIngredient
+common.Drone.deliverOrder
+common.Drone.latestOrder
+
+1 paragraph description of what you did:
+Drone works the exact same way as Staff. In addition to that, it also deliver orders.
+See the comment in the class for a more detailed explanation for how it works.
+
+-----------------
+
+Part 7: Configuration
+
+List of classes implemented (written as package.class)
+common.Configuration
+
+List of methods implemented (written as package.class.method):
+common.Configuration.parse
+
+1 paragraph description of what you did:
+Configuration is a simple parser that parses the config file line by line, switches on
+the first word and make inserts the data to the relevant variables in the Database class
+
+-----------------
+
+Part 8: Server
+
+List of classes implemented (written as package.class)
+server.Server
+ServerApplication
+
+List of methods implemented (written as package.class.method):
+All the methods contained within ServerInterface
+
+1 paragraph description of what you did:
+Implemented the ServerInterface and provided the logic to the Server by returning the
+relevant data from the Database class.
+
+-----------------
+
+Part 9: Persistence
+
+List of classes implemented (written as package.class)
+common.DataPersistence
+
+List of methods implemented (written as package.class.method):
+common.DataPersistence.write
+common.DataPersistence.createFile
+common.DataPersistence.supplierOutput
+common.DataPersistence.postcodeOutput
+common.DataPersistence.userOutput
+common.DataPersistence.unprocessedOrderOutput
+common.DataPersistence.processedOrderOutput
+common.DataPersistence.dronesOutput
+common.DataPersistence.staffsOutput
+common.DataPersistence.stockOutput
+common.DataPersistence.ingredientOutput
+common.DataPersistence.dishOutput
+
+1 paragraph description of what you did:
+DataPersistence is basically just a reverse Configuration parser, since at the beginning of
+the ServerApplication being launched, the Configuration parser is what's used to restore the
+state of the server and database from the backup file created by DataPersistence. Hence, the
+output of DataPersistence is consistent with the Configuration input format
+
+-----------------
+
+Assumptions made:
+ServerApplication will be launched before ClientApplication
+Configuration input file is in the correct order so that all the dependencies are established.
+
+Any other comments:
+Clearer defined specs would've helped a lot :)
