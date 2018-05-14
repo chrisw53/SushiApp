@@ -37,7 +37,7 @@ public class StockInfo implements Serializable {
 
     // Synchronized due to possibility of concurrent access
     synchronized void addQuant() {
-        this.quant += this.amountToAdd;
+        this.quant = this.amountToAdd + this.threshold - this.quant;
     }
 
     // Synchronized due to possibility of concurrent access
